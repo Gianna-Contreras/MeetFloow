@@ -1,0 +1,14 @@
+.calendario-container {
+  padding: 24px;
+}
+
+.calendario-container h1 {
+  font-size: 28px;
+  color: #1e3a5f;
+  margin-bottom: 8px;
+}
+
+.calendario-container p {
+  font-size: 14px;
+  color: #666;
+}

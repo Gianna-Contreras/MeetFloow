@@ -1,0 +1,11 @@
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <h1 class="logo">MeetFloow</h1>
+  </div>
+  <ul class="sidebar-menu">
+    <li *ngFor="let item of menuItems" [class.active]="isActive(item.path)" routerLink="{{ item.path }}">
+      <span class="icon">{{ item.icon }}</span>
+      <span class="label">{{ item.label }}</span>
+    </li>
+  </ul>
+</nav>

@@ -1,0 +1,19 @@
+<header class="header">
+  <div class="search-container">
+    <input 
+      type="text" 
+      class="search-input" 
+      placeholder="Buscar reuniones..."
+      [(ngModel)]="searchTerm"
+    >
+  </div>
+  <div class="header-right">
+    <button class="notification-btn">
+      🔔
+    </button>
+    <div class="user-profile">
+      <div class="avatar"></div>
+      <span class="user-name">{{ userName }}</span>
+    </div>
+  </div>
+</header>

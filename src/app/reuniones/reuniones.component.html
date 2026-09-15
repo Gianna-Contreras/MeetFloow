@@ -1,0 +1,82 @@
+<div class="reuniones-container">
+  <div class="reuniones-main">
+    <div class="reuniones-header">
+      <div class="header-left">
+        <h1 class="reuniones-title">Reuniones</h1>
+        <p class="reuniones-subtitle">Gestiona todas tus reuniones en un solo lugar.</p>
+      </div>
+      <button class="btn-primary">+ Nueva reunión</button>
+    </div>
+
+    <div class="tabs-container">
+      <button 
+        *ngFor="let tab of tabs" 
+        class="tab-btn"
+        [class.active]="tab === activeTab"
+      >
+        {{ tab }}
+      </button>
+    </div>
+
+    <div class="meetings-list">
+      <div *ngFor="let meeting of meetings" class="meeting-card">
+        <div class="meeting-header">
+          <span class="meeting-status {{ meeting.statusClass }}">{{ meeting.status }}</span>
+        </div>
+        <h3 class="meeting-title">{{ meeting.title }}</h3>
+        <div class="meeting-body">
+          <div class="meeting-info">
+            <span class="info-item">📅 {{ meeting.date }}</span>
+            <span class="info-item">⏰ {{ meeting.time }}</span>
+            <span class="info-item">📍 {{ meeting.location }}</span>
+          </div>
+          <div class="meeting-right-section">
+            <div class="meeting-participants">
+              <div class="participant-avatars">
+                <div class="avatar-small" *ngFor="let i of [1,2,3]"></div>
+                <div class="avatar-more">+{{ meeting.totalParticipants - 3 }}</div>
+              </div>
+              <span class="participant-count">{{ meeting.participants }}/{{ meeting.totalParticipants }}</span>
+            </div>
+            <div class="meeting-progress">
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="meeting.progress"></div>
+              </div>
+              <span class="progress-text">{{ meeting.progress }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="reuniones-sidebar">
+    <div class="sidebar-section">
+      <h3 class="sidebar-section-title">Resumen rápido</h3>
+      <div class="summary-item">
+        <span class="summary-label">Reuniones esta semana</span>
+        <span class="summary-value">{{ quickSummary.meetingsThisWeek }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Participantes totales</span>
+        <span class="summary-value">{{ quickSummary.totalParticipants }}</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <h3 class="sidebar-section-title">Actividad reciente</h3>
+      <div class="activities-list">
+        <div *ngFor="let activity of recentActivities" class="activity-item">
+          <div class="activity-icon">{{ activity.icon }}</div>
+          <div class="activity-content">
+            <p class="activity-description">{{ activity.description }}</p>
+            <div class="activity-meta">
+              <span class="activity-time">{{ activity.time }}</span>
+              <span class="activity-status">{{ activity.status }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

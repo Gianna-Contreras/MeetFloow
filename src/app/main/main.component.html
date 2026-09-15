@@ -1,0 +1,56 @@
+<main class="main-content">
+  <div class="main-header">
+    <h1 class="main-title">Reuniones</h1>
+    <p class="main-subtitle">Gestiona todas tus reuniones en un solo lugar.</p>
+    <button class="btn-primary">+ Nueva reunión</button>
+  </div>
+  
+  <div class="tabs-container">
+    <button 
+      *ngFor="let tab of tabs" 
+      class="tab-btn"
+      [class.active]="tab === activeTab"
+    >
+      {{ tab }}
+    </button>
+  </div>
+  
+  <div class="meetings-list">
+    <div class="meeting-card">
+      <div class="meeting-status in-progress">En curso</div>
+      <h3 class="meeting-title">Reunión de equipo semanal</h3>
+      <div class="meeting-info">
+        <span class="info-item">📅 12 Sep 2026</span>
+        <span class="info-item">⏰ 10:00 - 11:30</span>
+        <span class="info-item">📍 Sala Virtual A</span>
+      </div>
+      <div class="meeting-participants">
+        <div class="participant-avatars">
+          <div class="avatar-small"></div>
+          <div class="avatar-small"></div>
+          <div class="avatar-small"></div>
+          <div class="avatar-more">+5</div>
+        </div>
+        <span class="participant-count">8 participantes</span>
+      </div>
+    </div>
+    
+    <div class="meeting-card">
+      <div class="meeting-status scheduled">Programada</div>
+      <h3 class="meeting-title">Presentación de proyecto</h3>
+      <div class="meeting-info">
+        <span class="info-item">📅 14 Sep 2026</span>
+        <span class="info-item">⏰ 15:00 - 16:00</span>
+        <span class="info-item">📍 Sala Virtual B</span>
+      </div>
+      <div class="meeting-participants">
+        <div class="participant-avatars">
+          <div class="avatar-small"></div>
+          <div class="avatar-small"></div>
+          <div class="avatar-more">+3</div>
+        </div>
+        <span class="participant-count">5 participantes</span>
+      </div>
+    </div>
+  </div>
+</main>

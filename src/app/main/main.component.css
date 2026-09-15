@@ -1,0 +1,160 @@
+.main-content {
+  flex: 1;
+  background-color: #ffffff;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.main-header {
+  margin-bottom: 24px;
+}
+
+.main-title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #1e3a5f;
+  margin-bottom: 8px;
+}
+
+.main-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 16px;
+}
+
+.btn-primary {
+  background-color: #4a9eff;
+  color: #ffffff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: #3a8eef;
+}
+
+.tabs-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 16px;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  padding: 8px 16px;
+  font-size: 14px;
+  color: #666;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  background-color: #f5f5f5;
+}
+
+.tab-btn.active {
+  background-color: #4a9eff;
+  color: #ffffff;
+}
+
+.meetings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.meeting-card {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  transition: box-shadow 0.2s ease;
+}
+
+.meeting-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.meeting-status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.meeting-status.in-progress {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.meeting-status.scheduled {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.meeting-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.meeting-info {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.info-item {
+  font-size: 13px;
+  color: #666;
+}
+
+.meeting-participants {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.participant-avatars {
+  display: flex;
+  align-items: center;
+}
+
+.avatar-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  margin-right: -8px;
+  border: 2px solid #ffffff;
+}
+
+.avatar-more {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #666;
+  margin-left: 8px;
+}
+
+.participant-count {
+  font-size: 13px;
+  color: #666;
+}

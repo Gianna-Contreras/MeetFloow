@@ -1,0 +1,113 @@
+<div class="configuracion-container">
+  <div class="configuracion-header">
+    <h1>Configuración</h1>
+    <p>Personaliza tu experiencia en MeetFlow</p>
+  </div>
+
+  <div class="configuracion-content">
+    <div class="configuracion-sidebar">
+      <div class="sidebar-item active" (click)="selectCategory('perfil')">
+        <span>Perfil</span>
+      </div>
+      <div class="sidebar-item" (click)="selectCategory('notificaciones')">
+        <span>Notificaciones</span>
+      </div>
+      <div class="sidebar-item" (click)="selectCategory('preferencias')">
+        <span>Preferencias de reunión</span>
+      </div>
+      <div class="sidebar-item" (click)="selectCategory('integraciones')">
+        <span>Integraciones</span>
+      </div>
+      <div class="sidebar-item" (click)="selectCategory('privacidad')">
+        <span>Privacidad y seguridad</span>
+      </div>
+      <div class="sidebar-item" (click)="selectCategory('apariencia')">
+        <span>Apariencia</span>
+      </div>
+      <div class="sidebar-item" (click)="selectCategory('facturacion')">
+        <span>Facturación</span>
+      </div>
+    </div>
+
+    <div class="configuracion-main">
+      <div class="perfil-section" *ngIf="selectedCategory === 'perfil'">
+        <div class="perfil-header">
+          <h2>Perfil</h2>
+          <p>Administra tu información personal</p>
+        </div>
+
+        <div class="perfil-content">
+          <div class="form-group">
+            <label>Nombre completo</label>
+            <input type="text" [(ngModel)]="perfil.nombreCompleto">
+          </div>
+
+          <div class="form-group">
+            <label>Correo electrónico</label>
+            <input type="email" [(ngModel)]="perfil.correoElectronico">
+          </div>
+
+          <div class="form-group">
+            <label>Rol</label>
+            <select [(ngModel)]="perfil.rol">
+              <option value="Gerente de Proyectos">Gerente de Proyectos</option>
+              <option value="Desarrollador">Desarrollador</option>
+              <option value="Diseñador">Diseñador</option>
+              <option value="Analista">Analista</option>
+              <option value="Administrador">Administrador</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Foto de perfil</label>
+            <div class="profile-photo-section">
+              <div class="profile-photo">
+                <img [src]="perfil.fotoPerfil" alt="Foto de perfil">
+              </div>
+              <div class="photo-actions">
+                <button class="btn-secondary" (click)="triggerFileInput()">Cambiar foto</button>
+                <button class="btn-danger" (click)="eliminarFoto()">Eliminar</button>
+                <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none;">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Idioma</label>
+            <div class="select-with-arrow">
+              <select [(ngModel)]="perfil.idioma">
+                <option value="Español (Latinoamérica)">Español (Latinoamérica)</option>
+                <option value="Español (España)">Español (España)</option>
+                <option value="English (US)">English (US)</option>
+                <option value="Português (Brasil)">Português (Brasil)</option>
+                <option value="Français">Français</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Zona horaria</label>
+            <div class="select-with-arrow">
+              <select [(ngModel)]="perfil.zonaHoraria">
+                <option value="(UTC-05:00) Bogotá, Lima, Quito">(UTC-05:00) Bogotá, Lima, Quito</option>
+                <option value="(UTC-06:00) Ciudad de México">(UTC-06:00) Ciudad de México</option>
+                <option value="(UTC-03:00) Buenos Aires">(UTC-03:00) Buenos Aires</option>
+                <option value="(UTC+01:00) Madrid">(UTC+01:00) Madrid</option>
+                <option value="(UTC-05:00) New York">(UTC-05:00) New York</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-primary" (click)="guardarCambios()">Guardar cambios</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="placeholder-section" *ngIf="selectedCategory !== 'perfil'">
+        <h2>{{ getCategoryTitle(selectedCategory) }}</h2>
+        <p>Configuración de {{ getCategoryTitle(selectedCategory).toLowerCase() }}</p>
+      </div>
+    </div>
+  </div>
+</div>
