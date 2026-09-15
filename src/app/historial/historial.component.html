@@ -1,4 +1,91 @@
-<div class="historial-container">
-  <h1>Historial</h1>
-  <p>Historial de reuniones</p>
+<div class="historial-layout">
+  <div class="historial-main">
+    <div class="historial-header">
+      <div class="historial-title">
+        <h1>Historial</h1>
+        <p>Revisa todas tus reuniones pasadas</p>
+      </div>
+      <button class="export-btn">
+        <span class="export-icon">⬇️</span>
+        Exportar historial
+      </button>
+    </div>
+
+    <div class="filter-section">
+      <button class="filter-btn active" (click)="setFilter('todas')">Todas</button>
+      <button class="filter-btn" (click)="setFilter('completadas')">Completadas</button>
+      <button class="filter-btn" (click)="setFilter('canceladas')">Canceladas</button>
+      <button class="filter-btn" (click)="setFilter('este-mes')">Este mes</button>
+      <button class="filter-btn" (click)="setFilter('ultimos-30')">Últimos 30 días</button>
+    </div>
+
+    <div class="meetings-list">
+      <div class="meeting-card" *ngFor="let meeting of filteredMeetings">
+        <div class="meeting-date">
+          <div class="date-day">{{ meeting.dateDay }}</div>
+          <div class="date-month">{{ meeting.dateMonth }}</div>
+        </div>
+        <div class="meeting-info">
+          <div class="meeting-time">{{ meeting.time }}</div>
+          <h3 class="meeting-title">{{ meeting.title }}</h3>
+          <div class="meeting-details">
+            <span class="meeting-detail">⏱️ Duración: {{ meeting.duration }}</span>
+            <span class="meeting-detail">📍 Sala: {{ meeting.location }}</span>
+          </div>
+          <div class="meeting-participants">
+            <div class="participant-avatar" *ngFor="let participant of meeting.participants" [style.background-color]="participant.color"></div>
+            <span class="participants-count">+{{ meeting.participants.length }}</span>
+          </div>
+        </div>
+        <div class="meeting-status">
+          <span class="status-badge" [class.completed]="meeting.status === 'Completada'" [class.cancelled]="meeting.status === 'Cancelada'">
+            {{ meeting.status }}
+          </span>
+        </div>
+        <div class="meeting-actions">
+          <button class="action-btn secondary">Ver resumen</button>
+          <button class="action-btn primary">Descargar grabación</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="historial-sidebar">
+    <div class="activity-summary">
+      <h3>Resumen de actividad</h3>
+      <div class="summary-item">
+        <span class="summary-icon">📅</span>
+        <div class="summary-content">
+          <div class="summary-value">18</div>
+          <div class="summary-label">Reuniones este mes</div>
+        </div>
+      </div>
+      <div class="summary-item">
+        <span class="summary-icon">⏰</span>
+        <div class="summary-content">
+          <div class="summary-value">42 min</div>
+          <div class="summary-label">Duración promedio</div>
+        </div>
+      </div>
+      <div class="summary-item">
+        <span class="summary-icon">👥</span>
+        <div class="summary-content">
+          <div class="summary-value">24</div>
+          <div class="summary-label">Participantes únicos</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="recent-meetings">
+      <h3>Reuniones completadas recientes</h3>
+      <div class="recent-meeting-item" *ngFor="let meeting of recentMeetings">
+        <span class="check-icon">✓</span>
+        <div class="recent-meeting-info">
+          <div class="recent-meeting-date">{{ meeting.date }}</div>
+          <div class="recent-meeting-title">{{ meeting.title }}</div>
+        </div>
+      </div>
+      <a class="view-all-link" href="#">Ver todas las completadas →</a>
+    </div>
+  </div>
 </div>
