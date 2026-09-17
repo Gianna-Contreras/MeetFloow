@@ -1,4 +1,78 @@
 <div class="calendario-container">
-  <h1>Calendario</h1>
-  <p>Gestiona tu calendario</p>
+  <div class="calendario-header">
+    <div class="header-top">
+      <div class="search-bar">
+        <input type="text" placeholder="Buscar reuniones..." (input)="onSearch($event)" [value]="searchQuery">
+        <span class="search-icon">🔍</span>
+      </div>
+      <div class="header-title">
+        <h1>Calendario</h1>
+        <p>Visualiza y organiza todas tus reuniones.</p>
+      </div>
+      <button class="btn-primary">+ Nueva reunión</button>
+    </div>
+    
+    <div class="view-tabs">
+      <button 
+        *ngFor="let view of views" 
+        class="tab-btn"
+        [class.active]="view === currentView"
+        (click)="setView(view)"
+      >
+        {{ view }}
+      </button>
+    </div>
+  </div>
+  
+  <div class="calendario-content">
+    <div class="calendar-section">
+      <div class="calendar-header">
+        <h2>{{ displayTitle }}</h2>
+      </div>
+      
+      <div class="calendar-grid">
+        <div class="weekdays">
+          <div *ngFor="let day of weekDays" class="weekday">{{ day }}</div>
+        </div>
+        
+        <div class="days">
+          <div *ngFor="let day of filteredCalendarDays" class="day-cell" [class.today]="day.isToday">
+            <span class="day-number">{{ day.day }}</span>
+            <div class="day-events">
+              <div *ngFor="let event of day.events" class="event-item">
+                <span class="event-dot" [style.background-color]="event.color"></span>
+                <span class="event-title">{{ event.title }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="today-section">
+      <div class="today-header">
+        <h3>Hoy, 10 de septiembre</h3>
+        <span class="meeting-count">{{ todayMeetings.length }} reuniones</span>
+      </div>
+      
+      <div class="today-meetings">
+        <div *ngFor="let meeting of todayMeetings" class="meeting-card">
+          <div class="meeting-time">{{ meeting.time }}</div>
+          <div class="meeting-content">
+            <h4 class="meeting-title">{{ meeting.title }}</h4>
+            <div class="meeting-location">📍 {{ meeting.location }}</div>
+            <div class="meeting-status" [class]="meeting.statusClass">{{ meeting.status }}</div>
+          </div>
+          <div class="meeting-participants">
+            <div class="participant-avatars">
+              <div *ngFor="let i of [].constructor(meeting.visibleAvatars)" class="avatar-small"></div>
+              <div class="avatar-more">+{{ meeting.participants - meeting.visibleAvatars }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <a class="view-all-link">Ver todas las reuniones de hoy &gt;</a>
+    </div>
+  </div>
 </div>

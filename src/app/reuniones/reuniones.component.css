@@ -132,6 +132,11 @@
   color: #388e3c;
 }
 
+.meeting-status.cancelled {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
 .meeting-title {
   font-size: 13px;
   font-weight: 600;
@@ -235,7 +240,7 @@
   width: 320px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 
 .sidebar-section {
@@ -253,14 +258,15 @@
 
 .summary-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 4px;
   padding: 12px 0;
   border-bottom: 1px solid #e0e0e0;
 }
 
 .summary-item:last-child {
   border-bottom: none;
+  margin-bottom: 0;
 }
 
 .summary-label {

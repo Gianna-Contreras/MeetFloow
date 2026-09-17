@@ -9,17 +9,18 @@
     </div>
 
     <div class="tabs-container">
-      <button 
-        *ngFor="let tab of tabs" 
+      <button
+        *ngFor="let tab of tabs"
         class="tab-btn"
         [class.active]="tab === activeTab"
+        (click)="setActiveTab(tab)"
       >
         {{ tab }}
       </button>
     </div>
 
     <div class="meetings-list">
-      <div *ngFor="let meeting of meetings" class="meeting-card">
+      <div *ngFor="let meeting of filteredMeetings" class="meeting-card">
         <div class="meeting-header">
           <span class="meeting-status {{ meeting.statusClass }}">{{ meeting.status }}</span>
         </div>
