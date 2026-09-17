@@ -1,4 +1,136 @@
 <div class="contactos-container">
-  <h1>Contactos</h1>
-  <p>Gestiona tus contactos</p>
+  <div class="contactos-header">
+    <div class="header-left">
+      <h1>Contactos</h1>
+      <p class="subtitle">Gestiona las personas con las que te reúnes</p>
+    </div>
+    <div class="header-right">
+      <div class="search-bar">
+        <input 
+          type="text" 
+          placeholder="Buscar contactos..." 
+          [(ngModel)]="searchTerm"
+          class="search-input"
+        >
+        <span class="search-icon">🔍</span>
+      </div>
+      <button class="btn-primary">Nuevo contacto</button>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <button 
+      class="filter-btn" 
+      [class.active]="activeFilter === 'todos'"
+      (click)="setFilter('todos')"
+    >
+      Todos
+    </button>
+    <button 
+      class="filter-btn" 
+      [class.active]="activeFilter === 'team'"
+      (click)="setFilter('team')"
+    >
+      Equipo
+    </button>
+    <button 
+      class="filter-btn" 
+      [class.active]="activeFilter === 'external'"
+      (click)="setFilter('external')"
+    >
+      Externos
+    </button>
+    <button 
+      class="filter-btn" 
+      [class.active]="activeFilter === 'favorites'"
+      (click)="setFilter('favorites')"
+    >
+      Favoritos
+    </button>
+  </div>
+
+  <div class="contactos-content">
+    <div class="contactos-list">
+      <div 
+        *ngFor="let contact of filteredContacts"
+        class="contact-card"
+        [class.selected]="selectedContact?.id === contact.id"
+        (click)="selectContact(contact)"
+      >
+        <div class="contact-card-header">
+          <img [src]="contact.avatar" [alt]="contact.name" class="contact-avatar">
+          <div class="contact-info">
+            <h3 class="contact-name">{{ contact.name }}</h3>
+            <p class="contact-title">{{ contact.title }}</p>
+          </div>
+        </div>
+        <div class="contact-details">
+          <p class="contact-email">{{ contact.email }}</p>
+          <p class="contact-last-meeting">
+            <span class="label">Última reunión:</span> {{ contact.lastMeeting }}
+          </p>
+        </div>
+        <div class="contact-actions">
+          <button class="btn-secondary" (click)="sendMessage(contact); $event.stopPropagation()">
+            Mensaje
+          </button>
+          <button class="btn-secondary" (click)="scheduleMeeting(contact); $event.stopPropagation()">
+            Agendar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="contact-detail" *ngIf="selectedContact">
+      <div class="detail-header">
+        <button class="close-btn" (click)="closeDetail()">✕</button>
+        <img [src]="selectedContact.avatar" [alt]="selectedContact.name" class="detail-avatar">
+        <h2 class="detail-name">{{ selectedContact.name }}</h2>
+        <p class="detail-title">{{ selectedContact.title }}</p>
+      </div>
+
+      <div class="detail-section">
+        <h3 class="section-title">Información de contacto</h3>
+        <div class="info-row">
+          <span class="info-label">Email:</span>
+          <span class="info-value">{{ selectedContact.email }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Teléfono:</span>
+          <span class="info-value">{{ selectedContact.phone }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Empresa:</span>
+          <span class="info-value">{{ selectedContact.company }}</span>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="section-header">
+          <h3 class="section-title">Reuniones recientes</h3>
+          <a class="view-all-link">Ver todas</a>
+        </div>
+        <div class="meetings-list">
+          <div *ngFor="let meeting of selectedContact.meetings" class="meeting-item">
+            <span class="meeting-title">{{ meeting.title }}</span>
+            <span class="meeting-date">{{ meeting.date }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="section-header">
+          <h3 class="section-title">Notas</h3>
+          <span class="edit-icon">✏️</span>
+        </div>
+        <div class="notes-content">
+          {{ selectedContact.notes }}
+        </div>
+      </div>
+
+      <button class="btn-primary btn-full" (click)="editContact(selectedContact)">
+        Editar contacto
+      </button>
+    </div>
+  </div>
 </div>
