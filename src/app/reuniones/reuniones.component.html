@@ -5,7 +5,7 @@
         <h1 class="reuniones-title">Reuniones</h1>
         <p class="reuniones-subtitle">Gestiona todas tus reuniones en un solo lugar.</p>
       </div>
-      <button class="btn-primary">+ Nueva reunión</button>
+      <button class="btn-primary" (click)="abrirModal()">+ Nueva reunión</button>
     </div>
 
     <div class="tabs-container">
@@ -23,6 +23,7 @@
       <div *ngFor="let meeting of filteredMeetings" class="meeting-card">
         <div class="meeting-header">
           <span class="meeting-status {{ meeting.statusClass }}">{{ meeting.status }}</span>
+          <a class="btn-entrar" [routerLink]="['/reunion', meeting.id]">Entrar a la llamada</a>
         </div>
         <h3 class="meeting-title">{{ meeting.title }}</h3>
         <div class="meeting-body">
@@ -77,6 +78,71 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="modalAbierto" (click)="cerrarModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">{{ reunionCreada ? 'Reunión creada' : 'Nueva reunión' }}</h2>
+      <button class="modal-close" (click)="cerrarModal()">✕</button>
+    </div>
+
+    <form class="modal-form" *ngIf="!reunionCreada" (ngSubmit)="crearReunion()">
+      <label class="campo">
+        <span>Título</span>
+        <input type="text" name="title" [(ngModel)]="formulario.title" placeholder="Ej. Revisión semanal" />
+      </label>
+
+      <div class="campo-fila">
+        <label class="campo">
+          <span>Fecha</span>
+          <input type="date" name="fecha" [(ngModel)]="formulario.fecha" />
+        </label>
+        <label class="campo">
+          <span>Inicio</span>
+          <input type="time" name="horaInicio" [(ngModel)]="formulario.horaInicio" />
+        </label>
+        <label class="campo">
+          <span>Fin</span>
+          <input type="time" name="horaFin" [(ngModel)]="formulario.horaFin" />
+        </label>
+      </div>
+
+      <div class="campo-fila">
+        <label class="campo">
+          <span>Lugar</span>
+          <input type="text" name="location" [(ngModel)]="formulario.location" placeholder="Sala virtual MeetFloow" />
+        </label>
+        <label class="campo">
+          <span>Participantes</span>
+          <input type="number" min="1" name="totalParticipants" [(ngModel)]="formulario.totalParticipants" />
+        </label>
+      </div>
+
+      <p class="form-error" *ngIf="errorFormulario">{{ errorFormulario }}</p>
+
+      <div class="modal-acciones">
+        <button type="button" class="btn-secundario" (click)="cerrarModal()">Cancelar</button>
+        <button type="submit" class="btn-primary">Crear reunión</button>
+      </div>
+    </form>
+
+    <div class="modal-resultado" *ngIf="reunionCreada">
+      <p class="resultado-titulo">{{ reunionCreada.title }}</p>
+      <p class="resultado-dato">ID de reunión: <strong>{{ reunionCreada.id }}</strong></p>
+      <div class="enlace-box">
+        <input class="link-input" type="text" [value]="enlaceCreado" readonly />
+        <button type="button" class="btn-secundario" (click)="copiarEnlace()">
+          {{ enlaceCopiado ? 'Copiado' : 'Copiar' }}
+        </button>
+      </div>
+      <p class="resultado-ayuda">Comparte el enlace: quien lo abra entra directo a la llamada.</p>
+      <div class="modal-acciones">
+        <button type="button" class="btn-secundario" (click)="cerrarModal()">Cerrar</button>
+        <button type="button" class="btn-primary" (click)="entrarALlamada(reunionCreada.id)">Entrar a la llamada</button>
       </div>
     </div>
   </div>
