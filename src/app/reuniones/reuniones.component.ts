@@ -1,10 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { Meeting, ReunionesService } from '../services/reuniones.service';
 
 @Component({
   selector: 'app-reuniones',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './reuniones.component.html',
   styleUrl: './reuniones.component.css'
 })
@@ -12,92 +15,13 @@ export class ReunionesComponent {
   activeTab = 'Todas';
   tabs = ['Todas', 'Hoy', 'Próximas', 'Pasadas', 'Canceladas'];
 
-  meetings = [
-    {
-      status: 'En curso',
-      statusClass: 'in-progress',
-      title: 'Estrategia de producto Q2',
-      date: '16 Sep 2026',
-      time: '10:00 AM - 11:30 AM',
-      location: 'Sala de Juntas A',
-      participants: 5,
-      totalParticipants: 8,
-      progress: 62,
-      fullDate: new Date('2026-09-16')
-    },
-    {
-      status: 'Programada',
-      statusClass: 'scheduled',
-      title: 'Revisión de roadmap',
-      date: '16 Sep 2026',
-      time: '02:00 PM - 03:30 PM',
-      location: 'Sala Zoom',
-      participants: 4,
-      totalParticipants: 7,
-      progress: 57,
-      fullDate: new Date('2026-09-16')
-    },
-    {
-      status: 'Pendiente',
-      statusClass: 'pending',
-      title: 'Plan de marketing mensual',
-      date: '17 Sep 2026',
-      time: '09:30 AM - 10:30 AM',
-      location: 'Sala de Juntas B',
-      participants: 4,
-      totalParticipants: 5,
-      progress: 80,
-      fullDate: new Date('2026-09-17')
-    },
-    {
-      status: 'Completada',
-      statusClass: 'completed',
-      title: 'Retrospectiva de sprint',
-      date: '15 Sep 2026',
-      time: '11:00 AM - 12:00 PM',
-      location: 'Sala de Juntas A',
-      participants: 3,
-      totalParticipants: 6,
-      progress: 50,
-      fullDate: new Date('2026-09-15')
-    },
-    {
-      status: 'Programada',
-      statusClass: 'scheduled',
-      title: 'Presentación a stakeholders',
-      date: '18 Sep 2026',
-      time: '03:00 PM - 04:30 PM',
-      location: 'Sala Zoom',
-      participants: 4,
-      totalParticipants: 8,
-      progress: 50,
-      fullDate: new Date('2026-09-18')
-    },
-    {
-      status: 'Cancelada',
-      statusClass: 'cancelled',
-      title: 'Revisión de presupuesto',
-      date: '14 Sep 2026',
-      time: '04:00 PM - 05:00 PM',
-      location: 'Sala de Juntas A',
-      participants: 3,
-      totalParticipants: 5,
-      progress: 0,
-      fullDate: new Date('2026-09-14')
-    },
-    {
-      status: 'Programada',
-      statusClass: 'scheduled',
-      title: 'Kickoff de proyecto',
-      date: '20 Sep 2026',
-      time: '10:00 AM - 11:00 AM',
-      location: 'Sala de Conferencias',
-      participants: 6,
-      totalParticipants: 10,
-      progress: 30,
-      fullDate: new Date('2026-09-20')
-    }
-  ];
+  modalAbierto = false;
+  reunionCreada?: Meeting;
+  enlaceCreado = '';
+  enlaceCopiado = false;
+  errorFormulario = '';
+
+  formulario = this.formularioVacio();
 
   quickSummary = {
     meetingsThisWeek: 7,
@@ -131,7 +55,13 @@ export class ReunionesComponent {
     }
   ];
 
-  get filteredMeetings() {
+  constructor(private reunionesService: ReunionesService, private router: Router) {}
+
+  get meetings(): Meeting[] {
+    return this.reunionesService.getMeetings();
+  }
+
+  get filteredMeetings(): Meeting[] {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -164,5 +94,64 @@ export class ReunionesComponent {
 
   setActiveTab(tab: string) {
     this.activeTab = tab;
+  }
+
+  abrirModal(): void {
+    this.formulario = this.formularioVacio();
+    this.reunionCreada = undefined;
+    this.enlaceCreado = '';
+    this.errorFormulario = '';
+    this.modalAbierto = true;
+  }
+
+  cerrarModal(): void {
+    this.modalAbierto = false;
+  }
+
+  crearReunion(): void {
+    if (!this.formulario.title.trim()) {
+      this.errorFormulario = 'Escribe un título para la reunión.';
+      return;
+    }
+    if (!this.formulario.fecha || !this.formulario.horaInicio || !this.formulario.horaFin) {
+      this.errorFormulario = 'Completa la fecha y el horario de la reunión.';
+      return;
+    }
+
+    this.errorFormulario = '';
+    this.reunionCreada = this.reunionesService.crearReunion(this.formulario);
+    this.enlaceCreado = this.reunionesService.enlaceDeReunion(this.reunionCreada.id);
+  }
+
+  copiarEnlace(): void {
+    navigator.clipboard?.writeText(this.enlaceCreado);
+    this.enlaceCopiado = true;
+    setTimeout(() => (this.enlaceCopiado = false), 2000);
+  }
+
+  entrarALlamada(id: string): void {
+    this.modalAbierto = false;
+    this.router.navigate(['/reunion', id]);
+  }
+
+  enlaceDe(id: string): string {
+    return this.reunionesService.enlaceDeReunion(id);
+  }
+
+  private formularioVacio() {
+    const hoy = new Date();
+    const fecha = `${hoy.getFullYear()}-${(hoy.getMonth() + 1).toString().padStart(2, '0')}-${hoy
+      .getDate()
+      .toString()
+      .padStart(2, '0')}`;
+
+    return {
+      title: '',
+      fecha,
+      horaInicio: '09:00',
+      horaFin: '10:00',
+      location: '',
+      totalParticipants: 2
+    };
   }
 }

@@ -1,0 +1,44 @@
+<div class="llamada-container">
+  <div class="llamada-header">
+    <div>
+      <h1 class="llamada-title">{{ meeting?.title || 'Sala de reunión' }}</h1>
+      <p class="llamada-subtitle">ID de reunión: {{ meetingId }} · En llamada {{ duracion }}</p>
+    </div>
+    <div class="llamada-link">
+      <input class="link-input" type="text" [value]="enlace" readonly />
+      <button class="btn-copiar" (click)="copiarEnlace()">{{ enlaceCopiado ? 'Copiado' : 'Copiar enlace' }}</button>
+    </div>
+  </div>
+
+  <div *ngIf="!meeting" class="aviso">
+    Esta reunión no existe o fue creada en otro dispositivo. Puedes entrar igualmente a la sala.
+    <a routerLink="/reuniones">Volver a reuniones</a>
+  </div>
+
+  <div class="video-grid">
+    <div class="video-tile local">
+      <video #videoLocal autoplay playsinline muted></video>
+      <div *ngIf="!camaraActiva || errorMedia" class="video-placeholder">
+        <span class="avatar-inicial">Tú</span>
+      </div>
+      <span class="video-nombre">Tú {{ microfonoActivo ? '' : '· silenciado' }}</span>
+    </div>
+
+    <div class="video-tile esperando">
+      <span class="avatar-inicial">👥</span>
+      <span class="video-nombre">Esperando a los demás participantes…</span>
+    </div>
+  </div>
+
+  <p *ngIf="errorMedia" class="error-media">{{ errorMedia }}</p>
+
+  <div class="controles">
+    <button class="control" [class.off]="!microfonoActivo" (click)="toggleMicrofono()">
+      {{ microfonoActivo ? '🎤 Micrófono' : '🔇 Activar micrófono' }}
+    </button>
+    <button class="control" [class.off]="!camaraActiva" (click)="toggleCamara()">
+      {{ camaraActiva ? '📹 Cámara' : '🚫 Activar cámara' }}
+    </button>
+    <button class="control salir" (click)="salir()">📞 Salir de la llamada</button>
+  </div>
+</div>
