@@ -104,7 +104,335 @@
         </div>
       </div>
 
-      <div class="placeholder-section" *ngIf="selectedCategory !== 'perfil'">
+      <div class="notificaciones-section" *ngIf="selectedCategory === 'notificaciones'">
+        <div class="notificaciones-header">
+          <h2>Notificaciones</h2>
+          <p>Elige cómo y cuándo quieres recibir avisos</p>
+        </div>
+
+        <div class="notificaciones-content">
+          <!-- Canales de notificación -->
+          <div class="notification-section">
+            <div class="section-header">
+              <h3>Canales de notificación</h3>
+              <p>Activa o desactiva los canales por donde recibir notificaciones.</p>
+            </div>
+            <div class="notification-items">
+              <div class="notification-item">
+                <div class="notification-item-content">
+                  <div class="notification-icon">📧</div>
+                  <div class="notification-text">
+                    <h4>Email notifications</h4>
+                    <p>Recibe avisos por correo electrónico.</p>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" [(ngModel)]="notificaciones.emailEnabled">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="notification-item">
+                <div class="notification-item-content">
+                  <div class="notification-icon">🔔</div>
+                  <div class="notification-text">
+                    <h4>Notificaciones push</h4>
+                    <p>Recibe notificaciones push en tu dispositivo.</p>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" [(ngModel)]="notificaciones.pushEnabled">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="notification-item">
+                <div class="notification-item-content">
+                  <div class="notification-icon">💬</div>
+                  <div class="notification-text">
+                    <h4>Notificaciones en la app</h4>
+                    <p>Recibe notificaciones dentro de la aplicación.</p>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" [(ngModel)]="notificaciones.appEnabled">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tipos de notificación -->
+          <div class="notification-section">
+            <div class="section-header">
+              <h3>Tipos de notificación</h3>
+              <p>Selecciona qué eventos quieres que te notifiquemos.</p>
+            </div>
+            <div class="notification-items">
+              <div class="notification-item checkbox-item">
+                <label class="custom-checkbox">
+                  <input type="checkbox" [(ngModel)]="notificaciones.newInvitation">
+                  <span class="checkmark"></span>
+                </label>
+                <div class="notification-text">
+                  <h4>Nueva invitación a reunión</h4>
+                  <p>Cuando te inviten a una nueva reunión.</p>
+                </div>
+              </div>
+              <div class="notification-item checkbox-item">
+                <label class="custom-checkbox">
+                  <input type="checkbox" [(ngModel)]="notificaciones.meetingReminder">
+                  <span class="checkmark"></span>
+                </label>
+                <div class="notification-text">
+                  <h4>Recordatorio de reunión</h4>
+                  <p>15 min antes • 1 hora antes • 1 día antes</p>
+                </div>
+              </div>
+              <div class="notification-item checkbox-item">
+                <label class="custom-checkbox">
+                  <input type="checkbox" [(ngModel)]="notificaciones.meetingCancelled">
+                  <span class="checkmark"></span>
+                </label>
+                <div class="notification-text">
+                  <h4>Reunión cancelada o modificada</h4>
+                  <p>Cuando una reunión sea cancelada o modificada.</p>
+                </div>
+              </div>
+              <div class="notification-item checkbox-item">
+                <label class="custom-checkbox">
+                  <input type="checkbox" [(ngModel)]="notificaciones.joinRequests">
+                  <span class="checkmark"></span>
+                </label>
+                <div class="notification-text">
+                  <h4>Solicitudes de ingreso</h4>
+                  <p>Cuando alguien solicite unirse a una reunión.</p>
+                </div>
+              </div>
+              <div class="notification-item checkbox-item">
+                <label class="custom-checkbox">
+                  <input type="checkbox" [(ngModel)]="notificaciones.dailySummary">
+                  <span class="checkmark"></span>
+                </label>
+                <div class="notification-text">
+                  <h4>Resumen diario de actividad</h4>
+                  <p>Un resumen diario de tu actividad en MeetFlow.</p>
+                </div>
+              </div>
+              <div class="notification-item checkbox-item">
+                <label class="custom-checkbox">
+                  <input type="checkbox" [(ngModel)]="notificaciones.mentions">
+                  <span class="checkmark"></span>
+                </label>
+                <div class="notification-text">
+                  <h4>Menciones</h4>
+                  <p>Cuando te mencionen en comentarios o notas.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Horario de silencio -->
+          <div class="notification-section">
+            <div class="section-header">
+              <h3>Horario de silencio</h3>
+              <p>Silencia las notificaciones durante las horas que elijas.</p>
+            </div>
+            <div class="time-picker-container">
+              <div class="time-picker">
+                <label>Inicio</label>
+                <input type="time" [(ngModel)]="notificaciones.silenceStart">
+              </div>
+              <div class="time-picker">
+                <label>Fin</label>
+                <input type="time" [(ngModel)]="notificaciones.silenceEnd">
+              </div>
+            </div>
+          </div>
+
+          <!-- Frecuencia de notificaciones -->
+          <div class="notification-section">
+            <div class="section-header">
+              <h3>Frecuencia de notificaciones</h3>
+              <p>Elige cada cuánto quieres recibir resúmenes y notificaciones.</p>
+            </div>
+            <div class="frequency-selector">
+              <select [(ngModel)]="notificaciones.frequency">
+                <option value="Resumen diario">Resumen diario</option>
+                <option value="Resumen semanal">Resumen semanal</option>
+                <option value="Resumen mensual">Resumen mensual</option>
+                <option value="En tiempo real">En tiempo real</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-primary" (click)="guardarNotificaciones()">Guardar cambios</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="preferencias-section" *ngIf="selectedCategory === 'preferencias'">
+        <div class="preferencias-header">
+          <h2>Preferencias de reunión</h2>
+          <p>Configura las opciones predeterminadas para tus reuniones</p>
+        </div>
+
+        <div class="preferencias-content">
+          <!-- Duración predeterminada -->
+          <div class="preferencia-item">
+            <label>Duración predeterminada de la reunión</label>
+            <select [(ngModel)]="preferencias.duracionPredeterminada">
+              <option value="15 min">15 min</option>
+              <option value="30 min">30 min</option>
+              <option value="45 min">45 min</option>
+              <option value="1 hora">1 hora</option>
+              <option value="1 hora 30 min">1 hora 30 min</option>
+              <option value="2 horas">2 horas</option>
+            </select>
+          </div>
+
+          <!-- Tiempo predeterminado de recordatorio -->
+          <div class="preferencia-item">
+            <label>Tiempo predeterminado de recordatorio</label>
+            <select [(ngModel)]="preferencias.tiempoRecordatorio">
+              <option value="5 min">5 min</option>
+              <option value="10 min">10 min</option>
+              <option value="15 min">15 min</option>
+              <option value="30 min">30 min</option>
+              <option value="1 hora">1 hora</option>
+            </select>
+          </div>
+
+          <!-- Sala de espera -->
+          <div class="preferencia-item toggle-item">
+            <div class="preferencia-text">
+              <h4>Sala de espera</h4>
+              <p>Los participantes deben esperar a ser admitidos</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" [(ngModel)]="preferencias.salaEspera">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- Silenciar micrófono al entrar -->
+          <div class="preferencia-item toggle-item">
+            <div class="preferencia-text">
+              <h4>Silenciar micrófono al entrar</h4>
+              <p>Los participantes entran con el micrófono silenciado</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" [(ngModel)]="preferencias.silenciarMicrofono">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- Cámara apagada por defecto -->
+          <div class="preferencia-item toggle-item">
+            <div class="preferencia-text">
+              <h4>Cámara apagada por defecto</h4>
+              <p>Los participantes entran con la cámara apagada</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" [(ngModel)]="preferencias.camaraApagada">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- Grabación automática -->
+          <div class="preferencia-item toggle-item">
+            <div class="preferencia-text">
+              <h4>Grabación automática</h4>
+              <p>Grabar automáticamente todas las reuniones</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" [(ngModel)]="preferencias.grabacionAutomatica">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- Permitir compartir pantalla -->
+          <div class="preferencia-item toggle-item">
+            <div class="preferencia-text">
+              <h4>Permitir a los participantes compartir pantalla</h4>
+              <p>Los participantes pueden compartir su pantalla</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" [(ngModel)]="preferencias.compartirPantalla">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- Sala de espera para invitados externos -->
+          <div class="preferencia-item toggle-item">
+            <div class="preferencia-text">
+              <h4>Habilitar sala de espera para invitados externos</h4>
+              <p>Los invitados externos deben esperar aprobación</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" [(ngModel)]="preferencias.salaEsperaExternos">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- Idioma predeterminado -->
+          <div class="preferencia-item">
+            <label>Idioma predeterminado de la reunión</label>
+            <select [(ngModel)]="preferencias.idiomaPredeterminado">
+              <option value="Español">Español</option>
+              <option value="English">English</option>
+              <option value="Português">Português</option>
+              <option value="Français">Français</option>
+              <option value="Deutsch">Deutsch</option>
+            </select>
+          </div>
+
+          <!-- Manejo de zona horaria -->
+          <div class="preferencia-item">
+            <label>Manejo de zona horaria</label>
+            <select [(ngModel)]="preferencias.zonaHoraria">
+              <option value="Usar mi zona horaria">Usar mi zona horaria</option>
+              <option value="UTC-5">UTC-5</option>
+              <option value="UTC-4">UTC-4</option>
+              <option value="UTC-3">UTC-3</option>
+              <option value="UTC+0">UTC+0</option>
+              <option value="UTC+1">UTC+1</option>
+            </select>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-primary" (click)="guardarPreferencias()">Guardar cambios</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="integraciones-section" *ngIf="selectedCategory === 'integraciones'">
+        <div class="integraciones-header">
+          <h2>Integraciones</h2>
+          <p>Conecta MeetFlow con las herramientas que ya usas</p>
+        </div>
+
+        <div class="integraciones-content">
+          <div class="integraciones-grid">
+            <div class="integracion-card" *ngFor="let integracion of integraciones">
+              <div class="integracion-icon">{{ integracion.icon }}</div>
+              <div class="integracion-info">
+                <h4>{{ integracion.nombre }}</h4>
+                <p>{{ integracion.descripcion }}</p>
+              </div>
+              <div class="integracion-status">
+                <span class="status-badge" [class.connected]="integracion.conectado" [class.disconnected]="!integracion.conectado">
+                  {{ integracion.conectado ? 'Conectado' : 'No conectado' }}
+                </span>
+                <button class="btn-integracion" [class.btn-configurar]="integracion.conectado" [class.btn-conectar]="!integracion.conectado" (click)="toggleIntegracion(integracion)">
+                  {{ integracion.conectado ? 'Configurar' : 'Conectar' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="placeholder-section" *ngIf="selectedCategory !== 'perfil' && selectedCategory !== 'notificaciones' && selectedCategory !== 'preferencias' && selectedCategory !== 'integraciones'">
         <h2>{{ getCategoryTitle(selectedCategory) }}</h2>
         <p>Configuración de {{ getCategoryTitle(selectedCategory).toLowerCase() }}</p>
       </div>
