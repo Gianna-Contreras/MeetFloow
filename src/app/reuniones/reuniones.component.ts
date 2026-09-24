@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { MeetingService, Meeting } from '../services/meeting.service';
+import { IpService } from '../services/ip.service';
 
 @Component({
   selector: 'app-reuniones',
@@ -11,6 +14,65 @@ import { CommonModule } from '@angular/common';
 export class ReunionesComponent {
   activeTab = 'Todas';
   tabs = ['Todas', 'Hoy', 'Próximas', 'Pasadas', 'Canceladas'];
+  
+  showIpConfig = false;
+  manualIp = '';
+  currentUrl = '';
+  
+  meetings: Meeting[] = [];
+  
+  quickSummary = {
+    meetingsThisWeek: 0,
+    totalParticipants: 0
+  };
+
+  recentActivities = [
+    {
+      icon: '📅',
+      description: 'Nueva reunión creada',
+      time: 'Hace 2 horas',
+      status: 'Completado'
+    }
+  ];
+
+  constructor(
+    private router: Router,
+    private meetingService: MeetingService,
+    private ipService: IpService
+  ) {
+    this.loadMeetings();
+    this.updateCurrentUrl();
+  }
+
+  loadMeetings(): void {
+    this.meetingService.meetings$.subscribe(meetings => {
+      this.meetings = meetings;
+      this.quickSummary.meetingsThisWeek = meetings.length;
+      this.quickSummary.totalParticipants = meetings.reduce((sum, m) => sum + m.participantsCount, 0);
+    });
+  }
+
+  updateCurrentUrl(): void {
+    this.currentUrl = this.ipService.getBaseUrl();
+    this.manualIp = this.currentUrl.replace('http://', '').replace(':4200', '');
+  }
+
+  openIpConfig(): void {
+    this.showIpConfig = true;
+    this.updateCurrentUrl();
+  }
+
+  closeIpConfig(): void {
+    this.showIpConfig = false;
+  }
+
+  setManualIp(): void {
+    if (this.manualIp) {
+      this.ipService.setManualIp(this.manualIp);
+      this.updateCurrentUrl();
+      this.closeIpConfig();
+    }
+  }
 
   meetings = [
     {
@@ -164,5 +226,13 @@ export class ReunionesComponent {
 
   setActiveTab(tab: string) {
     this.activeTab = tab;
+  }
+
+  joinMeeting(meetingId: string): void {
+    this.router.navigate(['/meeting', meetingId]);
+  }
+
+  get todayMeetingsCount(): number {
+    return this.meetingService.getTodayMeetings().length;
   }
 }
