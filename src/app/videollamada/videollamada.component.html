@@ -1,0 +1,235 @@
+<div class="videollamada-container">
+  <!-- Main Video Area -->
+  <div class="video-main">
+    <div class="video-placeholder" [class.camera-on]="isCameraOn">
+      <div *ngIf="!isCameraOn" class="camera-off-message">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 7l-7 5 7 5V7z"></path>
+          <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+          <line x1="1" y1="1" x2="23" y2="23"></line>
+        </svg>
+        <h2>Cámara desactivada</h2>
+      </div>
+      <div *ngIf="isCameraOn" class="camera-on-message">
+        <div class="user-avatar">
+          <span>YO</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Sidebar -->
+  <div class="video-sidebar">
+    <!-- Participants Section -->
+    <div class="sidebar-section" *ngIf="showParticipants">
+      <div class="section-header">
+        <h3>Participantes ({{ participants.length }})</h3>
+        <button class="add-btn" (click)="addParticipant()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Añadir
+        </button>
+      </div>
+      
+      <div *ngIf="participants.length === 0" class="empty-state">
+        <p>No hay participantes</p>
+      </div>
+      
+      <div *ngIf="participants.length > 0" class="participants-list">
+        <div *ngFor="let participant of participants" class="participant-item">
+          <div class="participant-avatar">{{ participant.avatar }}</div>
+          <div class="participant-info">
+            <span class="participant-name">{{ participant.name }}</span>
+            <div class="participant-status">
+              <span *ngIf="participant.isMuted" class="status-icon muted">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                  <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
+                  <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
+                </svg>
+              </span>
+              <span *ngIf="participant.isVideoOff" class="status-icon video-off">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M23 7l-7 5 7 5V7z"></path>
+                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Meeting ID -->
+      <div class="meeting-id-section">
+        <div class="meeting-id-label">ID de reunión</div>
+        <div class="meeting-id-value">
+          <span>{{ callId }}</span>
+          <button class="copy-btn" (click)="copyCallId()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Section -->
+    <div class="sidebar-section chat-section" *ngIf="showChat">
+      <div class="section-header">
+        <h3>Chat</h3>
+      </div>
+      
+      <div class="chat-messages">
+        <div *ngIf="chatMessages.length === 0" class="empty-state">
+          <p>No hay mensajes</p>
+        </div>
+        
+        <div *ngFor="let message of chatMessages" class="chat-message" [class.system-message]="message.isSystem">
+          <div class="message-header">
+            <span class="message-sender">{{ message.sender }}</span>
+            <span class="message-time">{{ formatTime(message.timestamp) }}</span>
+          </div>
+          <div class="message-content">{{ message.message }}</div>
+        </div>
+      </div>
+
+      <div class="chat-input">
+        <input 
+          type="text" 
+          placeholder="Escribe un mensaje..." 
+          [(ngModel)]="newMessage"
+          (keyup.enter)="sendMessage()"
+        >
+        <button class="send-btn" (click)="sendMessage()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Control Bar -->
+  <div class="control-bar">
+    <button 
+      class="control-btn" 
+      [class.active]="isMicrophoneOn"
+      (click)="toggleMicrophone()"
+      title="Micrófono"
+    >
+      <svg *ngIf="!isMicrophoneOn" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="1" y1="1" x2="23" y2="23"></line>
+        <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
+        <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
+      </svg>
+      <svg *ngIf="isMicrophoneOn" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+        <line x1="12" y1="19" x2="12" y2="23"></line>
+        <line x1="8" y1="23" x2="16" y2="23"></line>
+      </svg>
+      <span>Micrófono</span>
+    </button>
+
+    <button 
+      class="control-btn" 
+      [class.active]="isCameraOn"
+      (click)="toggleCamera()"
+      title="Cámara"
+    >
+      <svg *ngIf="!isCameraOn" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 7l-7 5 7 5V7z"></path>
+        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+        <line x1="1" y1="1" x2="23" y2="23"></line>
+      </svg>
+      <svg *ngIf="isCameraOn" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 7l-7 5 7 5V7z"></path>
+        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+      </svg>
+      <span>Cámara</span>
+    </button>
+
+    <button 
+      class="control-btn" 
+      [class.active]="isScreenSharing"
+      (click)="toggleScreenShare()"
+      title="Compartir pantalla"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+        <line x1="8" y1="21" x2="16" y2="21"></line>
+        <line x1="12" y1="17" x2="12" y2="21"></line>
+      </svg>
+      <span>Compartir pantalla</span>
+    </button>
+
+    <button 
+      class="control-btn" 
+      [class.active]="showParticipants"
+      (click)="toggleParticipants()"
+      title="Participantes"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+      </svg>
+      <span>Participantes</span>
+    </button>
+
+    <button 
+      class="control-btn" 
+      [class.active]="showChat"
+      (click)="toggleChat()"
+      title="Chat"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+      <span>Chat</span>
+    </button>
+
+    <button 
+      class="control-btn" 
+      (click)="toggleReactions()"
+      title="Reacciones"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+        <line x1="9" y1="9" x2="9.01" y2="9"></line>
+        <line x1="15" y1="9" x2="15.01" y2="9"></line>
+      </svg>
+      <span>Reacciones</span>
+    </button>
+
+    <!-- Reactions Panel -->
+    <div *ngIf="showReactions" class="reactions-panel">
+      <button class="reaction-btn" (click)="sendReaction('👍')">👍</button>
+      <button class="reaction-btn" (click)="sendReaction('👏')">👏</button>
+      <button class="reaction-btn" (click)="sendReaction('❤️')">❤️</button>
+      <button class="reaction-btn" (click)="sendReaction('😂')">😂</button>
+      <button class="reaction-btn" (click)="sendReaction('😮')">😮</button>
+      <button class="reaction-btn" (click)="sendReaction('🎉')">🎉</button>
+    </div>
+
+    <button 
+      class="control-btn leave-btn" 
+      (click)="leaveCall()"
+      title="Salir"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+        <polyline points="16 17 21 12 16 7"></polyline>
+        <line x1="21" y1="12" x2="9" y2="12"></line>
+      </svg>
+      <span>Salir</span>
+    </button>
+  </div>
+</div>

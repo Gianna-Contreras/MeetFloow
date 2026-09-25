@@ -5,7 +5,13 @@
         <h1 class="reuniones-title">Reuniones</h1>
         <p class="reuniones-subtitle">Gestiona todas tus reuniones en un solo lugar.</p>
       </div>
-      <button class="btn-primary">+ Nueva reunión</button>
+      <button class="btn-primary" (click)="createNewMeeting()">+ Nueva reunión</button>
+      
+      <app-crear-reunion-modal 
+        [show]="showCrearReunionModal"
+        (meetingCreated)="onMeetingCreated($event)"
+        (modalClosed)="onModalClosed()">
+      </app-crear-reunion-modal>
     </div>
 
     <div class="tabs-container">
@@ -20,7 +26,7 @@
     </div>
 
     <div class="meetings-list">
-      <div *ngFor="let meeting of filteredMeetings" class="meeting-card">
+      <div *ngFor="let meeting of filteredMeetings" class="meeting-card" (click)="joinMeeting(meeting.id)">
         <div class="meeting-header">
           <span class="meeting-status {{ meeting.statusClass }}">{{ meeting.status }}</span>
         </div>

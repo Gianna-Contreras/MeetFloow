@@ -3,15 +3,18 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MeetingService, Meeting } from '../services/meeting.service';
 import { IpService } from '../services/ip.service';
+import { CrearReunionModalComponent } from '../crear-reunion-modal/crear-reunion-modal.component';
 
 @Component({
   selector: 'app-reuniones',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, CrearReunionModalComponent],
   templateUrl: './reuniones.component.html',
   styleUrl: './reuniones.component.css'
 })
 export class ReunionesComponent {
+  showCrearReunionModal = false;
+  
   activeTab = 'Todas';
   tabs = ['Todas', 'Hoy', 'Próximas', 'Pasadas', 'Canceladas'];
   
@@ -128,10 +131,24 @@ export class ReunionesComponent {
   }
 
   joinMeeting(meetingId: string): void {
-    this.router.navigate(['/meeting', meetingId]);
+    this.router.navigate(['/videollamada', meetingId]);
   }
 
   get todayMeetingsCount(): number {
     return this.meetingService.getTodayMeetings().length;
+  }
+
+  createNewMeeting(): void {
+    this.showCrearReunionModal = true;
+  }
+
+  onMeetingCreated(meeting: Meeting): void {
+    this.showCrearReunionModal = false;
+    // Navigate to the video call interface with the new meeting ID
+    this.router.navigate(['/videollamada', meeting.id]);
+  }
+
+  onModalClosed(): void {
+    this.showCrearReunionModal = false;
   }
 }
