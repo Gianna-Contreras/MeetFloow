@@ -1,15 +1,7 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-interface Perfil {
-  nombreCompleto: string;
-  correoElectronico: string;
-  rol: string;
-  fotoPerfil: string;
-  idioma: string;
-  zonaHoraria: string;
-}
+import { PerfilService, Perfil } from '../services/perfil.service';
 
 interface Notificaciones {
   emailEnabled: boolean;
@@ -45,6 +37,40 @@ interface Integracion {
   descripcion: string;
   icon: string;
   conectado: boolean;
+}
+
+interface Privacidad {
+  contrasenaActual: string;
+  nuevaContrasena: string;
+  confirmarContrasena: string;
+  dosFactoresActivado: boolean;
+  alertasInicioSesion: boolean;
+  visibilidadCorreo: string;
+  visibilidadPerfil: string;
+  visibilidadBusquedas: string;
+}
+
+interface Sesion {
+  id: string;
+  icono: string;
+  dispositivo: string;
+  ubicacion: string;
+  fecha: string;
+}
+
+interface Apariencia {
+  tema: string;
+  colorAcento: string;
+  densidad: string;
+  tamanoFuente: string;
+  comportamientoSidebar: string;
+}
+
+interface Factura {
+  id: string;
+  fecha: string;
+  descripcion: string;
+  monto: string;
 }
 
 @Component({
@@ -153,6 +179,82 @@ export class ConfiguracionComponent {
     }
   ];
 
+  privacidad: Privacidad = {
+    contrasenaActual: '',
+    nuevaContrasena: '',
+    confirmarContrasena: '',
+    dosFactoresActivado: true,
+    alertasInicioSesion: true,
+    visibilidadCorreo: 'Solo yo',
+    visibilidadPerfil: 'Contactos',
+    visibilidadBusquedas: 'Todos'
+  };
+
+  showPassword = {
+    current: false,
+    new: false,
+    confirm: false
+  };
+
+  sesionesActivas: Sesion[] = [
+    {
+      id: '1',
+      icono: '💻',
+      dispositivo: 'Windows • Chrome',
+      ubicacion: 'Madrid, España',
+      fecha: '2 may 2024, 10:30'
+    },
+    {
+      id: '2',
+      icono: '📱',
+      dispositivo: 'iPhone • Safari',
+      ubicacion: 'Barcelona, España',
+      fecha: '1 may 2024, 15:45'
+    },
+    {
+      id: '3',
+      icono: '💻',
+      dispositivo: 'MacBook Pro • Chrome',
+      ubicacion: 'Valencia, España',
+      fecha: '30 abr 2024, 09:20'
+    }
+  ];
+
+  apariencia: Apariencia = {
+    tema: 'claro',
+    colorAcento: '#3b82f6',
+    densidad: 'comodo',
+    tamanoFuente: 'mediano',
+    comportamientoSidebar: 'fija'
+  };
+
+  facturas: Factura[] = [
+    {
+      id: '1',
+      fecha: '15 may 2025',
+      descripcion: 'Plan Pro - Mensual',
+      monto: '$24.00'
+    },
+    {
+      id: '2',
+      fecha: '15 abr 2025',
+      descripcion: 'Plan Pro - Mensual',
+      monto: '$24.00'
+    },
+    {
+      id: '3',
+      fecha: '15 mar 2025',
+      descripcion: 'Plan Pro - Mensual',
+      monto: '$24.00'
+    },
+    {
+      id: '4',
+      fecha: '15 feb 2025',
+      descripcion: 'Plan Pro - Mensual',
+      monto: '$24.00'
+    }
+  ];
+
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   constructor() {
@@ -160,6 +262,8 @@ export class ConfiguracionComponent {
     this.cargarNotificacionesGuardadas();
     this.cargarPreferenciasGuardadas();
     this.cargarIntegracionesGuardadas();
+    this.cargarPrivacidadGuardada();
+    this.cargarAparienciaGuardada();
   }
 
   selectCategory(category: string): void {
@@ -288,5 +392,80 @@ export class ConfiguracionComponent {
         console.error('Error al cargar integraciones guardadas:', e);
       }
     }
+  }
+
+  togglePassword(field: 'current' | 'new' | 'confirm'): void {
+    this.showPassword[field] = !this.showPassword[field];
+  }
+
+  actualizarContrasena(): void {
+    if (this.privacidad.nuevaContrasena !== this.privacidad.confirmarContrasena) {
+      alert('Las contraseñas no coinciden');
+      return;
+    }
+    console.log('Contraseña actualizada');
+    this.privacidad.contrasenaActual = '';
+    this.privacidad.nuevaContrasena = '';
+    this.privacidad.confirmarContrasena = '';
+  }
+
+  configurar2FA(): void {
+    console.log('Configurar 2FA');
+  }
+
+  cerrarSesion(sesion: Sesion): void {
+    this.sesionesActivas = this.sesionesActivas.filter(s => s.id !== sesion.id);
+    console.log('Sesión cerrada:', sesion.dispositivo);
+  }
+
+  descargarDatos(): void {
+    console.log('Descargar datos');
+  }
+
+  eliminarCuenta(): void {
+    if (confirm('¿Estás seguro de que quieres eliminar tu cuenta? Esta acción es irreversible.')) {
+      console.log('Cuenta eliminada');
+    }
+  }
+
+  private cargarPrivacidadGuardada(): void {
+    const privacidadGuardada = localStorage.getItem('privacidad');
+    if (privacidadGuardada) {
+      try {
+        const privacidadParseada = JSON.parse(privacidadGuardada);
+        this.privacidad = { ...this.privacidad, ...privacidadParseada };
+      } catch (e) {
+        console.error('Error al cargar privacidad guardada:', e);
+      }
+    }
+  }
+
+  seleccionarColor(color: string): void {
+    this.apariencia.colorAcento = color;
+  }
+
+  guardarApariencia(): void {
+    this.guardarAparienciaEnStorage();
+    console.log('Apariencia guardada:', this.apariencia);
+  }
+
+  private guardarAparienciaEnStorage(): void {
+    localStorage.setItem('apariencia', JSON.stringify(this.apariencia));
+  }
+
+  private cargarAparienciaGuardada(): void {
+    const aparienciaGuardada = localStorage.getItem('apariencia');
+    if (aparienciaGuardada) {
+      try {
+        const aparienciaParseada = JSON.parse(aparienciaGuardada);
+        this.apariencia = { ...this.apariencia, ...aparienciaParseada };
+      } catch (e) {
+        console.error('Error al cargar apariencia guardada:', e);
+      }
+    }
+  }
+
+  descargarFactura(factura: Factura): void {
+    console.log('Descargando factura:', factura.id);
   }
 }

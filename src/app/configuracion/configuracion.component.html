@@ -432,7 +432,427 @@
         </div>
       </div>
 
-      <div class="placeholder-section" *ngIf="selectedCategory !== 'perfil' && selectedCategory !== 'notificaciones' && selectedCategory !== 'preferencias' && selectedCategory !== 'integraciones'">
+      <div class="privacidad-section" *ngIf="selectedCategory === 'privacidad'">
+        <div class="privacidad-header">
+          <h2>Privacidad y seguridad</h2>
+          <p>Gestiona la seguridad de tu cuenta y datos personales</p>
+        </div>
+
+        <div class="privacidad-content">
+          <!-- Cambiar contraseña -->
+          <div class="privacidad-subsection">
+            <h3>Cambiar contraseña</h3>
+            <div class="password-fields">
+              <div class="password-field">
+                <label>Contraseña actual</label>
+                <div class="password-input">
+                  <input type="password" [(ngModel)]="privacidad.contrasenaActual" [type]="showPassword.current ? 'text' : 'password'">
+                  <button class="eye-icon" (click)="togglePassword('current')">👁</button>
+                </div>
+              </div>
+              <div class="password-field">
+                <label>Nueva contraseña</label>
+                <div class="password-input">
+                  <input type="password" [(ngModel)]="privacidad.nuevaContrasena" [type]="showPassword.new ? 'text' : 'password'">
+                  <button class="eye-icon" (click)="togglePassword('new')">👁</button>
+                </div>
+              </div>
+              <div class="password-field">
+                <label>Confirmar nueva contraseña</label>
+                <div class="password-input">
+                  <input type="password" [(ngModel)]="privacidad.confirmarContrasena" [type]="showPassword.confirm ? 'text' : 'password'">
+                  <button class="eye-icon" (click)="togglePassword('confirm')">👁</button>
+                </div>
+              </div>
+            </div>
+            <button class="btn-primary" (click)="actualizarContrasena()">Actualizar contraseña</button>
+          </div>
+
+          <!-- Autenticación de dos factores -->
+          <div class="privacidad-subsection">
+            <h3>Autenticación de dos factores (2FA)</h3>
+            <div class="toggle-item">
+              <div class="toggle-text">
+                <h4>Activar 2FA</h4>
+                <span class="status-badge" [class.connected]="privacidad.dosFactoresActivado">Activado</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="privacidad.dosFactoresActivado">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <button class="btn-secondary" (click)="configurar2FA()">Configurar 2FA</button>
+          </div>
+
+          <!-- Sesiones activas -->
+          <div class="privacidad-subsection">
+            <h3>Sesiones activas</h3>
+            <div class="sessions-list">
+              <div class="session-item" *ngFor="let sesion of sesionesActivas">
+                <div class="session-info">
+                  <div class="session-icon">{{ sesion.icono }}</div>
+                  <div class="session-details">
+                    <h4>{{ sesion.dispositivo }}</h4>
+                    <p>{{ sesion.ubicacion }} • {{ sesion.fecha }}</p>
+                  </div>
+                </div>
+                <button class="btn-danger" (click)="cerrarSesion(sesion)">Cerrar sesión</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Alertas de inicio de sesión -->
+          <div class="privacidad-subsection">
+            <h3>Alertas de inicio de sesión</h3>
+            <div class="toggle-item">
+              <div class="toggle-text">
+                <h4>Recibir alertas</h4>
+                <p>Notificarme cuando inicie sesión en un nuevo dispositivo</p>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="privacidad.alertasInicioSesion">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Privacidad del perfil -->
+          <div class="privacidad-subsection">
+            <h3>Privacidad del perfil</h3>
+            <div class="privacy-settings">
+              <div class="privacy-setting">
+                <label>Quién puede ver mi dirección de correo</label>
+                <select [(ngModel)]="privacidad.visibilidadCorreo">
+                  <option value="Solo yo">Solo yo</option>
+                  <option value="Contactos">Contactos</option>
+                  <option value="Todos">Todos</option>
+                </select>
+              </div>
+              <div class="privacy-setting">
+                <label>Quién puede ver mi información de perfil</label>
+                <select [(ngModel)]="privacidad.visibilidadPerfil">
+                  <option value="Solo yo">Solo yo</option>
+                  <option value="Contactos">Contactos</option>
+                  <option value="Todos">Todos</option>
+                </select>
+              </div>
+              <div class="privacy-setting">
+                <label>Quién puede verme en búsquedas</label>
+                <select [(ngModel)]="privacidad.visibilidadBusquedas">
+                  <option value="Solo yo">Solo yo</option>
+                  <option value="Contactos">Contactos</option>
+                  <option value="Todos">Todos</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Descargar mis datos -->
+          <div class="privacidad-subsection">
+            <h3>Descargar mis datos</h3>
+            <p>Obtén una copia de todos tus datos personales</p>
+            <button class="btn-primary" (click)="descargarDatos()">Descargar datos</button>
+          </div>
+
+          <!-- Zona de peligro -->
+          <div class="privacidad-subsection danger-zone">
+            <h3>Zona de peligro</h3>
+            <p>Estas acciones son irreversibles</p>
+            <button class="btn-danger" (click)="eliminarCuenta()">Eliminar cuenta</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="apariencia-section" *ngIf="selectedCategory === 'apariencia'">
+        <div class="apariencia-header">
+          <h2>Apariencia</h2>
+          <p>Personaliza la apariencia de MeetFlow</p>
+        </div>
+
+        <div class="apariencia-content">
+          <!-- Selección de tema -->
+          <div class="apariencia-subsection">
+            <h3>Tema</h3>
+            <div class="theme-options">
+              <label class="theme-option" [class.selected]="apariencia.tema === 'claro'">
+                <input type="radio" name="tema" value="claro" [(ngModel)]="apariencia.tema">
+                <div class="theme-preview theme-light">
+                  <div class="preview-sidebar"></div>
+                  <div class="preview-content"></div>
+                </div>
+                <span>Claro</span>
+              </label>
+              <label class="theme-option" [class.selected]="apariencia.tema === 'oscuro'">
+                <input type="radio" name="tema" value="oscuro" [(ngModel)]="apariencia.tema">
+                <div class="theme-preview theme-dark">
+                  <div class="preview-sidebar"></div>
+                  <div class="preview-content"></div>
+                </div>
+                <span>Oscuro</span>
+              </label>
+              <label class="theme-option" [class.selected]="apariencia.tema === 'sistema'">
+                <input type="radio" name="tema" value="sistema" [(ngModel)]="apariencia.tema">
+                <div class="theme-preview theme-system">
+                  <div class="preview-sidebar"></div>
+                  <div class="preview-content"></div>
+                </div>
+                <span>Sistema</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Color de acento -->
+          <div class="apariencia-subsection">
+            <h3>Color de acento</h3>
+            <div class="accent-colors">
+              <div class="color-option" [class.selected]="apariencia.colorAcento === '#3b82f6'" (click)="seleccionarColor('#3b82f6')" style="background-color: #3b82f6;"></div>
+              <div class="color-option" [class.selected]="apariencia.colorAcento === '#10b981'" (click)="seleccionarColor('#10b981')" style="background-color: #10b981;"></div>
+              <div class="color-option" [class.selected]="apariencia.colorAcento === '#f59e0b'" (click)="seleccionarColor('#f59e0b')" style="background-color: #f59e0b;"></div>
+              <div class="color-option" [class.selected]="apariencia.colorAcento === '#ef4444'" (click)="seleccionarColor('#ef4444')" style="background-color: #ef4444;"></div>
+              <div class="color-option" [class.selected]="apariencia.colorAcento === '#8b5cf6'" (click)="seleccionarColor('#8b5cf6')" style="background-color: #8b5cf6;"></div>
+              <div class="color-option" [class.selected]="apariencia.colorAcento === '#ec4899'" (click)="seleccionarColor('#ec4899')" style="background-color: #ec4899;"></div>
+            </div>
+            <button class="btn-secondary">Personalizar</button>
+          </div>
+
+          <!-- Densidad -->
+          <div class="apariencia-subsection">
+            <h3>Densidad</h3>
+            <div class="density-options">
+              <label class="density-option" [class.selected]="apariencia.densidad === 'compacto'">
+                <input type="radio" name="densidad" value="compacto" [(ngModel)]="apariencia.densidad">
+                <div class="density-preview density-compact">
+                  <div class="preview-item"></div>
+                  <div class="preview-item"></div>
+                  <div class="preview-item"></div>
+                </div>
+                <span>Compacto</span>
+              </label>
+              <label class="density-option" [class.selected]="apariencia.densidad === 'comodo'">
+                <input type="radio" name="densidad" value="comodo" [(ngModel)]="apariencia.densidad">
+                <div class="density-preview density-comfortable">
+                  <div class="preview-item"></div>
+                  <div class="preview-item"></div>
+                  <div class="preview-item"></div>
+                </div>
+                <span>Cómodo</span>
+              </label>
+              <label class="density-option" [class.selected]="apariencia.densidad === 'espacioso'">
+                <input type="radio" name="densidad" value="espacioso" [(ngModel)]="apariencia.densidad">
+                <div class="density-preview density-spacious">
+                  <div class="preview-item"></div>
+                  <div class="preview-item"></div>
+                  <div class="preview-item"></div>
+                </div>
+                <span>Espacioso</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Tamaño de fuente -->
+          <div class="apariencia-subsection">
+            <h3>Tamaño de fuente</h3>
+            <select [(ngModel)]="apariencia.tamanoFuente">
+              <option value="pequeño">Pequeño</option>
+              <option value="mediano">Mediano</option>
+              <option value="grande">Grande</option>
+              <option value="extra-grande">Extra grande</option>
+            </select>
+          </div>
+
+          <!-- Comportamiento del sidebar -->
+          <div class="apariencia-subsection">
+            <h3>Comportamiento del sidebar</h3>
+            <select [(ngModel)]="apariencia.comportamientoSidebar">
+              <option value="fija">Fija</option>
+              <option value="colapsable">Colapsable</option>
+              <option value="flotante">Flotante</option>
+            </select>
+          </div>
+
+          <!-- Vista previa en vivo -->
+          <div class="apariencia-subsection">
+            <h3>Vista previa</h3>
+            <div class="live-preview">
+              <div class="preview-sidebar">
+                <div class="preview-nav-item active"></div>
+                <div class="preview-nav-item"></div>
+                <div class="preview-nav-item"></div>
+                <div class="preview-nav-item"></div>
+              </div>
+              <div class="preview-main">
+                <div class="preview-header"></div>
+                <div class="preview-search"></div>
+                <div class="preview-card"></div>
+                <div class="preview-actions">
+                  <div class="preview-action"></div>
+                  <div class="preview-action"></div>
+                  <div class="preview-action"></div>
+                </div>
+                <div class="preview-participants">
+                  <div class="preview-avatar"></div>
+                  <div class="preview-avatar"></div>
+                  <div class="preview-avatar"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-primary" (click)="guardarApariencia()">Guardar cambios</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="facturacion-section" *ngIf="selectedCategory === 'facturacion'">
+        <div class="facturacion-header">
+          <h2>Facturación</h2>
+          <p>Administra tu plan y métodos de pago</p>
+        </div>
+
+        <div class="facturacion-content">
+          <!-- Plan actual -->
+          <div class="facturacion-card">
+            <div class="card-header">
+              <div class="card-title">
+                <span class="card-icon">👑</span>
+                <h3>Plan actual</h3>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="plan-info">
+                <h4>Plan Pro</h4>
+                <p class="plan-price">$24.00 /mes</p>
+                <p class="plan-renewal">Renovación: 15 de junio, 2025</p>
+              </div>
+              <button class="btn-secondary">Cambiar plan ></button>
+            </div>
+          </div>
+
+          <!-- Uso este mes -->
+          <div class="facturacion-card">
+            <div class="card-header">
+              <div class="card-title">
+                <span class="card-icon">📊</span>
+                <h3>Uso este mes</h3>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="usage-item">
+                <div class="usage-header">
+                  <span class="usage-icon">📅</span>
+                  <span class="usage-label">Reuniones</span>
+                  <span class="usage-value">12 / 20</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" [style.width.%]="60"></div>
+                </div>
+              </div>
+              <div class="usage-item">
+                <div class="usage-header">
+                  <span class="usage-icon">💾</span>
+                  <span class="usage-label">Almacenamiento</span>
+                  <span class="usage-value">18.6 GB / 50 GB</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" [style.width.%]="37"></div>
+                </div>
+              </div>
+              <div class="usage-item">
+                <div class="usage-header">
+                  <span class="usage-icon">👥</span>
+                  <span class="usage-label">Participantes</span>
+                  <span class="usage-value">186 / 500</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" [style.width.%]="37"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Método de pago -->
+          <div class="facturacion-card">
+            <div class="card-header">
+              <div class="card-title">
+                <span class="card-icon">💳</span>
+                <h3>Método de pago</h3>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="payment-info">
+                <div class="payment-card">
+                  <span class="card-brand">VISA</span>
+                  <span class="card-number">Visa .... .... 4242</span>
+                </div>
+                <p class="card-expiry">Vence: 06/2027</p>
+              </div>
+              <button class="btn-secondary">Actualizar</button>
+            </div>
+          </div>
+
+          <!-- Historial de facturación -->
+          <div class="facturacion-card">
+            <div class="card-header">
+              <div class="card-title">
+                <span class="card-icon">📄</span>
+                <h3>Historial de facturación</h3>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="billing-list">
+                <div class="billing-item" *ngFor="let factura of facturas">
+                  <div class="billing-info">
+                    <p class="billing-date">{{ factura.fecha }}</p>
+                    <p class="billing-description">{{ factura.descripcion }}</p>
+                  </div>
+                  <div class="billing-actions">
+                    <span class="billing-amount">{{ factura.monto }}</span>
+                    <button class="btn-download" (click)="descargarFactura(factura)">
+                      <span>⬇</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <a class="view-all-link" href="#">Ver todos los recibos ></a>
+            </div>
+          </div>
+
+          <!-- Mejora tu plan -->
+          <div class="facturacion-card upgrade-card">
+            <div class="card-header">
+              <div class="card-title">
+                <span class="card-icon">👑</span>
+                <h3>Mejora tu plan</h3>
+              </div>
+            </div>
+            <div class="card-body">
+              <p class="upgrade-description">Desbloquea más reuniones, almacenamiento y funciones avanzadas para equipos en crecimiento.</p>
+              <div class="upgrade-features">
+                <div class="feature-item">
+                  <span class="feature-icon">✓</span>
+                  <span>Reuniones ilimitadas</span>
+                </div>
+                <div class="feature-item">
+                  <span class="feature-icon">✓</span>
+                  <span>Almacenamiento ampliado</span>
+                </div>
+                <div class="feature-item">
+                  <span class="feature-icon">✓</span>
+                  <span>Participantes ilimitados</span>
+                </div>
+                <div class="feature-item">
+                  <span class="feature-icon">✓</span>
+                  <span>Funciones avanzadas</span>
+                </div>
+              </div>
+              <button class="btn-primary">Ver planes superiores ></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="placeholder-section" *ngIf="selectedCategory !== 'perfil' && selectedCategory !== 'notificaciones' && selectedCategory !== 'preferencias' && selectedCategory !== 'integraciones' && selectedCategory !== 'privacidad' && selectedCategory !== 'apariencia' && selectedCategory !== 'facturacion'">
         <h2>{{ getCategoryTitle(selectedCategory) }}</h2>
         <p>Configuración de {{ getCategoryTitle(selectedCategory).toLowerCase() }}</p>
       </div>

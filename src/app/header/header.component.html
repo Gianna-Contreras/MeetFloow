@@ -12,8 +12,10 @@
       🔔
     </button>
     <div class="user-profile">
-      <div class="avatar"></div>
-      <span class="user-name">Gianna Contreras</span>
+      <div class="avatar">
+        <img [src]="userPhoto" alt="Foto de perfil">
+      </div>
+      <span class="user-name">{{ userName }}</span>
     </div>
   </div>
 </header>
