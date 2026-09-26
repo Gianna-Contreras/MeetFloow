@@ -1,0 +1,23 @@
+<Solution>
+    <Configurations>
+        <Platform Name="Any CPU" />
+    </Configurations>
+    <Folder Name="/src/">
+        <Project Path="src/MeetFloow.Domain/MeetFloow.Domain.csproj" />
+        <Project Path="src/MeetFloow.Application/MeetFloow.Application.csproj" />
+        <Project Path="src/MeetFloow.EntityFrameworkCore/MeetFloow.EntityFrameworkCore.csproj" />
+        <Project Path="src/MeetFloow.Domain.Shared/MeetFloow.Domain.Shared.csproj" />
+        <Project Path="src/MeetFloow.Application.Contracts/MeetFloow.Application.Contracts.csproj" />
+        <Project Path="src/MeetFloow.HttpApi/MeetFloow.HttpApi.csproj" />
+        <Project Path="src/MeetFloow.HttpApi.Client/MeetFloow.HttpApi.Client.csproj" />
+        <Project Path="src/MeetFloow.DbMigrator/MeetFloow.DbMigrator.csproj" />
+        <Project Path="src/MeetFloow.HttpApi.Host/MeetFloow.HttpApi.Host.csproj" />
+    </Folder>
+    <Folder Name="/test/">
+        <Project Path="test/MeetFloow.Application.Tests/MeetFloow.Application.Tests.csproj" />
+        <Project Path="test/MeetFloow.EntityFrameworkCore.Tests/MeetFloow.EntityFrameworkCore.Tests.csproj" />
+        <Project Path="test/MeetFloow.TestBase/MeetFloow.TestBase.csproj" />
+        <Project Path="test/MeetFloow.Domain.Tests/MeetFloow.Domain.Tests.csproj" />
+        <Project Path="test/MeetFloow.HttpApi.Client.ConsoleTestApp/MeetFloow.HttpApi.Client.ConsoleTestApp.csproj" />
+    </Folder>
+</Solution>

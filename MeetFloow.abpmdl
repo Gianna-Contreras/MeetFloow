@@ -1,0 +1,109 @@
+{
+  "template": "app",
+  "imports": {
+    "Volo.Abp.LeptonXLiteTheme": {
+      "version": "5.1.0",
+      "isInstalled": true,
+      "creationTime": "09/26/2026 00:26:40 +00:00"
+    },
+    "Volo.Abp.Account": {
+      "version": "10.1.0",
+      "isInstalled": true,
+      "creationTime": "09/26/2026 00:26:40 +00:00"
+    },
+    "Volo.Abp.OpenIddict": {
+      "version": "10.1.0",
+      "isInstalled": true,
+      "creationTime": "09/26/2026 00:26:40 +00:00"
+    },
+    "Volo.Abp.Identity": {
+      "version": "10.1.0",
+      "isInstalled": true,
+      "creationTime": "09/26/2026 00:26:40 +00:00"
+    },
+    "Volo.Abp.TenantManagement": {
+      "version": "10.1.0",
+      "isInstalled": true,
+      "creationTime": "09/26/2026 00:26:40 +00:00"
+    },
+    "Volo.Abp.SettingManagement": {
+      "version": "10.1.0",
+      "isInstalled": true,
+      "creationTime": "09/26/2026 00:26:40 +00:00"
+    },
+    "Volo.Abp.PermissionManagement": {
+      "version": "10.1.0",
+      "isInstalled": true,
+      "creationTime": "09/26/2026 00:26:40 +00:00"
+    },
+    "Volo.Abp.FeatureManagement": {
+      "version": "10.1.0",
+      "isInstalled": true,
+      "creationTime": "09/26/2026 00:26:40 +00:00"
+    }
+  },
+  "folders": {
+    "items": {
+      "src": {},
+      "test": {}
+    }
+  },
+  "packages": {
+    "MeetFloow.Application": {
+      "path": "src/MeetFloow.Application/MeetFloow.Application.abppkg",
+      "folder": "src"
+    },
+    "MeetFloow.Application.Tests": {
+      "path": "test/MeetFloow.Application.Tests/MeetFloow.Application.Tests.abppkg",
+      "folder": "test"
+    },
+    "MeetFloow.Domain.Shared": {
+      "path": "src/MeetFloow.Domain.Shared/MeetFloow.Domain.Shared.abppkg",
+      "folder": "src"
+    },
+    "MeetFloow.Application.Contracts": {
+      "path": "src/MeetFloow.Application.Contracts/MeetFloow.Application.Contracts.abppkg",
+      "folder": "src"
+    },
+    "MeetFloow.HttpApi": {
+      "path": "src/MeetFloow.HttpApi/MeetFloow.HttpApi.abppkg",
+      "folder": "src"
+    },
+    "MeetFloow.HttpApi.Client": {
+      "path": "src/MeetFloow.HttpApi.Client/MeetFloow.HttpApi.Client.abppkg",
+      "folder": "src"
+    },
+    "MeetFloow.EntityFrameworkCore.Tests": {
+      "path": "test/MeetFloow.EntityFrameworkCore.Tests/MeetFloow.EntityFrameworkCore.Tests.abppkg",
+      "folder": "test"
+    },
+    "MeetFloow.EntityFrameworkCore": {
+      "path": "src/MeetFloow.EntityFrameworkCore/MeetFloow.EntityFrameworkCore.abppkg",
+      "folder": "src"
+    },
+    "MeetFloow.TestBase": {
+      "path": "test/MeetFloow.TestBase/MeetFloow.TestBase.abppkg",
+      "folder": "test"
+    },
+    "MeetFloow.Domain.Tests": {
+      "path": "test/MeetFloow.Domain.Tests/MeetFloow.Domain.Tests.abppkg",
+      "folder": "test"
+    },
+    "MeetFloow.HttpApi.Client.ConsoleTestApp": {
+      "path": "test/MeetFloow.HttpApi.Client.ConsoleTestApp/MeetFloow.HttpApi.Client.ConsoleTestApp.abppkg",
+      "folder": "test"
+    },
+    "MeetFloow.DbMigrator": {
+      "path": "src/MeetFloow.DbMigrator/MeetFloow.DbMigrator.abppkg",
+      "folder": "src"
+    },
+    "MeetFloow.HttpApi.Host": {
+      "path": "src/MeetFloow.HttpApi.Host/MeetFloow.HttpApi.Host.abppkg",
+      "folder": "src"
+    },
+    "MeetFloow.Domain": {
+      "path": "src/MeetFloow.Domain/MeetFloow.Domain.abppkg",
+      "folder": "src"
+    }
+  }
+}
