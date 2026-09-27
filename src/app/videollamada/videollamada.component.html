@@ -1,21 +1,43 @@
 <div class="videollamada-container">
-  <!-- Main Video Area -->
-  <div class="video-main">
-    <div class="video-placeholder" [class.camera-on]="isCameraOn">
-      <div *ngIf="!isCameraOn" class="camera-off-message">
-        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M23 7l-7 5 7 5V7z"></path>
-          <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
-          <line x1="1" y1="1" x2="23" y2="23"></line>
-        </svg>
-        <h2>Cámara desactivada</h2>
-      </div>
-      <div *ngIf="isCameraOn" class="camera-on-message">
-        <div class="user-avatar">
-          <span>YO</span>
-        </div>
+  <!-- Header -->
+  <div class="call-header">
+    <div class="header-left">
+      <div class="logo">MeetFlow</div>
+      <div class="meeting-info">
+        <h1>Nueva reunión</h1>
+        <div class="meeting-code">{{ callId }}</div>
       </div>
     </div>
+    <div class="header-center">
+      <div class="timer">{{ meetingTime }}</div>
+    </div>
+    <div class="header-right">
+      <button class="header-icon-btn" title="Seguridad">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </button>
+      <button class="header-icon-btn" title="Ayuda">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+      </button>
+      <button class="header-icon-btn" title="Más opciones">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="1"></circle>
+          <circle cx="12" cy="5" r="1"></circle>
+          <circle cx="12" cy="19" r="1"></circle>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Video Area -->
+  <div class="video-main">
+    <div #jitsiContainer class="jitsi-container"></div>
   </div>
 
   <!-- Right Sidebar -->
@@ -35,6 +57,7 @@
       
       <div *ngIf="participants.length === 0" class="empty-state">
         <p>No hay participantes</p>
+        <p class="share-instruction">Comparte el código de la reunión para invitar a otros</p>
       </div>
       
       <div *ngIf="participants.length > 0" class="participants-list">
@@ -64,7 +87,7 @@
 
       <!-- Meeting ID -->
       <div class="meeting-id-section">
-        <div class="meeting-id-label">ID de reunión</div>
+        <div class="meeting-id-label">Código de reunión</div>
         <div class="meeting-id-value">
           <span>{{ callId }}</span>
           <button class="copy-btn" (click)="copyCallId()">
@@ -80,18 +103,19 @@
     <!-- Chat Section -->
     <div class="sidebar-section chat-section" *ngIf="showChat">
       <div class="section-header">
-        <h3>Chat</h3>
+        <h3>Chat <span class="notification-badge">{{ chatMessages.length }}</span></h3>
       </div>
       
       <div class="chat-messages">
         <div *ngIf="chatMessages.length === 0" class="empty-state">
           <p>No hay mensajes</p>
+          <p class="messages-placeholder">Los mensajes aparecerán aquí.</p>
         </div>
         
         <div *ngFor="let message of chatMessages" class="chat-message" [class.system-message]="message.isSystem">
           <div class="message-header">
             <span class="message-sender">{{ message.sender }}</span>
-            <span class="message-time">{{ formatTime(message.timestamp) }}</span>
+            <span class="message-time">{{ formatMessageTime(message.timestamp) }}</span>
           </div>
           <div class="message-content">{{ message.message }}</div>
         </div>
