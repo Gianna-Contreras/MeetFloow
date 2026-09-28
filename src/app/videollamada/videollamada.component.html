@@ -4,18 +4,35 @@
     <div class="header-left">
       <div class="logo">MeetFlow</div>
       <div class="meeting-info">
-        <h1>Nueva reunión</h1>
-        <div class="meeting-code">{{ callId }}</div>
+        <h1>{{ meeting?.title || 'Nueva reunión' }}</h1>
+        <div class="meeting-details">
+          <span class="meeting-code">{{ callId }}</span>
+          <span class="meeting-duration" *ngIf="meeting">{{ meeting.duration }}</span>
+        </div>
       </div>
     </div>
     <div class="header-center">
-      <div class="timer">{{ meetingTime }}</div>
+      <div class="timer-container">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <div class="timer">{{ meetingTime }}</div>
+      </div>
     </div>
     <div class="header-right">
-      <button class="header-icon-btn" title="Seguridad">
+      <button class="header-icon-btn" (click)="copyCallId()" title="Copiar código de reunión">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+      </button>
+      <button class="header-icon-btn" (click)="inviteParticipants()" title="Invitar participantes">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
         </svg>
       </button>
       <button class="header-icon-btn" title="Ayuda">
@@ -25,93 +42,50 @@
           <line x1="12" y1="17" x2="12.01" y2="17"></line>
         </svg>
       </button>
-      <button class="header-icon-btn" title="Más opciones">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="1"></circle>
-          <circle cx="12" cy="5" r="1"></circle>
-          <circle cx="12" cy="19" r="1"></circle>
-        </svg>
-      </button>
     </div>
   </div>
 
   <!-- Main Video Area -->
   <div class="video-main">
     <div #jitsiContainer class="jitsi-container"></div>
-  </div>
-
-  <!-- Right Sidebar -->
-  <div class="video-sidebar">
-    <!-- Participants Section -->
-    <div class="sidebar-section" *ngIf="showParticipants">
-      <div class="section-header">
-        <h3>Participantes ({{ participants.length }})</h3>
-        <button class="add-btn" (click)="addParticipant()">
+    
+    <!-- Mini Participants Panel -->
+    <div class="mini-participants-panel" *ngIf="showParticipants">
+      <div class="mini-panel-header">
+        <span>Participantes ({{ participants.length }})</span>
+        <button class="close-btn" (click)="toggleParticipants()">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
-          Añadir
         </button>
       </div>
-      
-      <div *ngIf="participants.length === 0" class="empty-state">
-        <p>No hay participantes</p>
-        <p class="share-instruction">Comparte el código de la reunión para invitar a otros</p>
-      </div>
-      
-      <div *ngIf="participants.length > 0" class="participants-list">
-        <div *ngFor="let participant of participants" class="participant-item">
-          <div class="participant-avatar">{{ participant.avatar }}</div>
-          <div class="participant-info">
-            <span class="participant-name">{{ participant.name }}</span>
-            <div class="participant-status">
-              <span *ngIf="participant.isMuted" class="status-icon muted">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="1" y1="1" x2="23" y2="23"></line>
-                  <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
-                  <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
-                </svg>
-              </span>
-              <span *ngIf="participant.isVideoOff" class="status-icon video-off">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M23 7l-7 5 7 5V7z"></path>
-                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
-                  <line x1="1" y1="1" x2="23" y2="23"></line>
-                </svg>
-              </span>
-            </div>
-          </div>
+      <div class="mini-participants-list">
+        <div *ngFor="let participant of participants" class="mini-participant-item">
+          <div class="mini-participant-avatar">{{ participant.avatar }}</div>
+          <span class="mini-participant-name">{{ participant.name }}</span>
         </div>
-      </div>
-
-      <!-- Meeting ID -->
-      <div class="meeting-id-section">
-        <div class="meeting-id-label">Código de reunión</div>
-        <div class="meeting-id-value">
-          <span>{{ callId }}</span>
-          <button class="copy-btn" (click)="copyCallId()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-            </svg>
-          </button>
+        <div *ngIf="participants.length === 0" class="mini-empty-state">
+          <p>Esperando participantes...</p>
         </div>
       </div>
     </div>
 
-    <!-- Chat Section -->
-    <div class="sidebar-section chat-section" *ngIf="showChat">
-      <div class="section-header">
-        <h3>Chat <span class="notification-badge">{{ chatMessages.length }}</span></h3>
+    <!-- Chat Panel -->
+    <div class="chat-panel" *ngIf="showChat">
+      <div class="chat-panel-header">
+        <span>Chat</span>
+        <button class="close-btn" (click)="toggleChat()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       </div>
-      
       <div class="chat-messages">
-        <div *ngIf="chatMessages.length === 0" class="empty-state">
+        <div *ngIf="chatMessages.length === 0" class="chat-empty-state">
           <p>No hay mensajes</p>
-          <p class="messages-placeholder">Los mensajes aparecerán aquí.</p>
         </div>
-        
         <div *ngFor="let message of chatMessages" class="chat-message" [class.system-message]="message.isSystem">
           <div class="message-header">
             <span class="message-sender">{{ message.sender }}</span>
@@ -120,7 +94,6 @@
           <div class="message-content">{{ message.message }}</div>
         </div>
       </div>
-
       <div class="chat-input">
         <input 
           type="text" 

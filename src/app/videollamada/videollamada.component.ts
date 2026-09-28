@@ -49,6 +49,7 @@ export class VideollamadaComponent implements OnInit, OnDestroy, AfterViewInit {
   private timerInterval: any;
   meetingTime: string = '00:00';
   elapsedSeconds: number = 0;
+  meetingDuration: number = 3600; // Default 1 hour in seconds
   
   @ViewChild('jitsiContainer', { static: false }) jitsiContainer!: ElementRef;
 
@@ -108,6 +109,17 @@ export class VideollamadaComponent implements OnInit, OnDestroy, AfterViewInit {
         isMuted: false,
         isVideoOff: true
       }));
+      
+      // Calculate meeting duration in seconds
+      const durationParts = this.meeting.duration.split(' ');
+      let totalSeconds = 0;
+      if (durationParts.length >= 2) {
+        const hours = parseInt(durationParts[0]) || 0;
+        const minutes = parseInt(durationParts[1]) || 0;
+        totalSeconds = (hours * 3600) + (minutes * 60);
+      }
+      
+      this.meetingDuration = totalSeconds > 0 ? totalSeconds : 3600; // Default 1 hour
       this.startTimer();
     }
   }
@@ -120,18 +132,26 @@ export class VideollamadaComponent implements OnInit, OnDestroy, AfterViewInit {
 
   initializeJitsi(): void {
     const domain = 'meet.jit.si';
+    const cleanCallId = this.callId.replace(/\s/g, '');
+    
     const options = {
-      roomName: this.callId.replace(/\s/g, ''),
+      roomName: cleanCallId,
       width: '100%',
       height: '100%',
       parentNode: this.jitsiContainer?.nativeElement,
       userInfo: {
-        displayName: 'Usuario'
+        displayName: this.meeting?.participants[0] || 'Usuario'
       },
       configOverwrite: {
-        startWithAudioMuted: true,
-        startWithVideoMuted: true,
-        prejoinPageEnabled: false
+        startWithAudioMuted: false,
+        startWithVideoMuted: false,
+        prejoinPageEnabled: true,
+        enableWelcomePage: false,
+        disableDeepLinking: true,
+        enableLipSync: true,
+        enableRemb: true,
+        enableTcc: true,
+        useStunTurn: true
       },
       interfaceConfigOverwrite: {
         TOOLBAR_BUTTONS: [
@@ -142,11 +162,24 @@ export class VideollamadaComponent implements OnInit, OnDestroy, AfterViewInit {
           'tileview', 'videobackgroundblur', 'download', 'help', 'mute-everyone', 'security'
         ],
         SETTINGS_SECTIONS: ['devices', 'language', 'moderator', 'profile', 'calendar'],
+        DEFAULT_BACKGROUND: '#1a1a2e',
+        // Improved design elements
+        DEFAULT_LOGO_URL: '',
+        DEFAULT_WELCOME_PAGE_LOGO_URL: '',
+        PROVIDER_NAME: 'MeetFlow',
+        NATIVE_APP_NAME: 'MeetFlow',
+        // Improved video layout
+        FILM_STRIP_ONLY: false,
+        TILE_VIEW_ENABLED: true,
+        INITIAL_TOOLBAR_BUTTONS: ['microphone', 'camera', 'desktop', 'closedcaptions', 'chat'],
+        // Disable unnecessary UI elements
+        SHOW_DEEP_LINKING_IMAGE: false,
+        SHOW_PROMOTIONAL_CLOSE_PAGE: false,
+        SHOW_BRAND_WATERMARK: false,
+        SHOW_POWERED_BY: false,
         SHOW_JITSI_WATERMARK: false,
         SHOW_WATERMARK_FOR_GUESTS: false,
-        DEFAULT_BACKGROUND: '#1a1a2e',
-        // Remove default Jitsi UI elements to use custom controls
-        SHOW_PROMOTIONAL_CLOSE_PAGE: false
+        SHOW_CHROME_EXTENSION_BANNER: false
       },
       onload: this.onJitsiLoad.bind(this)
     };
@@ -162,7 +195,10 @@ export class VideollamadaComponent implements OnInit, OnDestroy, AfterViewInit {
       videoConferenceLeft: this.handleVideoConferenceLeft.bind(this),
       videoMuteStatusChanged: this.handleVideoStatusChanged.bind(this),
       audioMuteStatusChanged: this.handleAudioStatusChanged.bind(this),
-      screenSharingStatusChanged: this.handleScreenSharingStatusChanged.bind(this)
+      screenSharingStatusChanged: this.handleScreenSharingStatusChanged.bind(this),
+      tileViewChanged: this.handleTileViewChanged.bind(this),
+      incomingMessage: this.handleIncomingMessage.bind(this),
+      chatUpdated: this.handleChatUpdated.bind(this)
     });
   }
 
@@ -209,6 +245,42 @@ export class VideollamadaComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isScreenSharing = event.on;
   };
 
+  handleTileViewChanged: (event: any) => void = (event) => {
+    console.log('Tile view changed:', event);
+  };
+
+  handleIncomingMessage: (event: any) => void = (event) => {
+    console.log('Incoming message:', event);
+    const message: ChatMessage = {
+      id: `msg-${Date.now()}`,
+      sender: event.sender || 'Participante',
+      message: event.message || '',
+      timestamp: new Date(),
+      isSystem: false
+    };
+    this.chatMessages.push(message);
+  };
+
+  handleChatUpdated: (event: any) => void = (event) => {
+    console.log('Chat updated:', event);
+    // Handle chat updates from Jitsi
+    if (event.messages && Array.isArray(event.messages)) {
+      event.messages.forEach((jitsiMessage: any) => {
+        const existingMessage = this.chatMessages.find(m => m.id === `jitsi-${jitsiMessage.id}`);
+        if (!existingMessage) {
+          const message: ChatMessage = {
+            id: `jitsi-${jitsiMessage.id}`,
+            sender: jitsiMessage.sender?.name || 'Participante',
+            message: jitsiMessage.message || '',
+            timestamp: new Date(jitsiMessage.timestamp || Date.now()),
+            isSystem: false
+          };
+          this.chatMessages.push(message);
+        }
+      });
+    }
+  };
+
   addJitsiParticipant(participant: any): void {
     const newParticipant: Participant = {
       id: participant.id,
@@ -233,7 +305,15 @@ export class VideollamadaComponent implements OnInit, OnDestroy, AfterViewInit {
     this.elapsedSeconds = 0;
     this.timerInterval = setInterval(() => {
       this.elapsedSeconds++;
-      this.meetingTime = this.formatTime(this.elapsedSeconds);
+      const remainingSeconds = this.meetingDuration - this.elapsedSeconds;
+      
+      if (remainingSeconds <= 0) {
+        this.stopTimer();
+        this.meetingTime = '00:00';
+        this.handleMeetingEnd();
+      } else {
+        this.meetingTime = this.formatTime(remainingSeconds);
+      }
     }, 1000);
   }
 
@@ -241,6 +321,26 @@ export class VideollamadaComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
     }
+  }
+
+  handleMeetingEnd(): void {
+    this.addSystemMessage('La reunión ha terminado según el tiempo estimado');
+    
+    // Give users a moment to react before automatically ending
+    setTimeout(() => {
+      if (this.jitsiApi) {
+        this.jitsiApi.executeCommand('hangup');
+      }
+      
+      if (this.meetingId && this.meeting) {
+        this.meetingService.updateMeeting(this.meetingId, {
+          status: 'Completada',
+          statusClass: 'completed',
+          progress: 100
+        });
+      }
+      this.router.navigate(['/reuniones']);
+    }, 5000); // 5 seconds warning before ending
   }
 
   formatTime(seconds: number): string {
@@ -283,11 +383,7 @@ export class VideollamadaComponent implements OnInit, OnDestroy, AfterViewInit {
 
   toggleCamera(): void {
     if (this.jitsiApi) {
-      if (this.isCameraOn) {
-        this.jitsiApi.executeCommand('toggleVideo');
-      } else {
-        this.jitsiApi.executeCommand('toggleVideo');
-      }
+      this.jitsiApi.executeCommand('toggleVideo');
     }
   }
 
@@ -332,8 +428,24 @@ export class VideollamadaComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   copyCallId(): void {
-    navigator.clipboard.writeText(this.callId.replace(' ', ''));
+    const cleanCallId = this.callId.replace(/\s/g, '');
+    navigator.clipboard.writeText(cleanCallId);
     this.addSystemMessage('ID de llamada copiado al portapapeles');
+  }
+
+  inviteParticipants(): void {
+    const cleanCallId = this.callId.replace(/\s/g, '');
+    const meetingUrl = `https://meet.jit.si/${cleanCallId}`;
+    
+    // Copy meeting URL to clipboard
+    navigator.clipboard.writeText(meetingUrl);
+    this.addSystemMessage('Enlace de reunión copiado al portapapeles');
+    
+    // Also show the meeting URL in a prompt for manual sharing
+    const userResponse = prompt(
+      'Enlace de reunión (copiado al portapapeles):',
+      meetingUrl
+    );
   }
 
   addParticipant(): void {
@@ -363,6 +475,12 @@ export class VideollamadaComponent implements OnInit, OnDestroy, AfterViewInit {
 
   sendMessage(): void {
     if (this.newMessage.trim()) {
+      // Send message through Jitsi API for real-time chat
+      if (this.jitsiApi) {
+        this.jitsiApi.executeCommand('sendTextMessage', this.newMessage);
+      }
+      
+      // Also add to local chat for immediate feedback
       const message: ChatMessage = {
         id: `msg-${Date.now()}`,
         sender: 'Tú',

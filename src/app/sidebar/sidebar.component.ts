@@ -12,7 +12,7 @@ import { Router, RouterModule } from '@angular/router';
 export class SidebarComponent {
   menuItems = [
     { label: 'Inicio', icon: '🏠', path: '/inicio' },
-    { label: 'Reuniones', icon: '📅', path: '/reuniones' },
+    { label: 'Reuniones', icon: '🖥️', path: '/reuniones' },
     { label: 'Calendario', icon: '📆', path: '/calendario' },
     { label: 'Historial', icon: '📋', path: '/historial' },
     { label: 'Contactos', icon: '👥', path: '/contactos' },
