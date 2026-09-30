@@ -71,6 +71,7 @@ export class ReunionesComponent {
       this.quickSummary.meetingsThisWeek = meetings.length;
       this.quickSummary.totalParticipants = meetings.reduce((sum, m) => sum + m.participantsCount, 0);
     });
+    this.meetingService.loadMeetings();
   }
 
   updateCurrentUrl(): void {

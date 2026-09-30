@@ -93,9 +93,10 @@ public class MeetFloowDbContext :
         builder.Entity<MeetFloow.Reuniones.Reunion>(b =>
         {
             b.ToTable(MeetFloowConsts.DbTablePrefix + "Reuniones", MeetFloowConsts.DbSchema);
-            b.ConfigureByConvention(); 
+            b.ConfigureByConvention();
             b.Property(x => x.Titulo).IsRequired().HasMaxLength(256);
-            b.HasOne<IdentityUser>().WithMany().HasForeignKey(x => x.AnfitrionId).IsRequired();
+            b.Property(x => x.Descripcion).HasMaxLength(2000);
+            b.Property(x => x.Ubicacion).HasMaxLength(500);
         });
 
         builder.Entity<MeetFloow.Reuniones.ParticipanteReunion>(b =>

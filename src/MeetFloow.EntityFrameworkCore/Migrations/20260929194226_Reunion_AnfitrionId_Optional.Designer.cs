@@ -3,6 +3,7 @@ using System;
 using MeetFloow.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Volo.Abp.EntityFrameworkCore;
 
@@ -11,9 +12,11 @@ using Volo.Abp.EntityFrameworkCore;
 namespace MeetFloow.Migrations
 {
     [DbContext(typeof(MeetFloowDbContext))]
-    partial class MeetFloowDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260929194226_Reunion_AnfitrionId_Optional")]
+    partial class Reunion_AnfitrionId_Optional
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -260,6 +263,8 @@ namespace MeetFloow.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AnfitrionId");
 
                     b.ToTable("AppReuniones", (string)null);
                 });
@@ -2327,6 +2332,13 @@ namespace MeetFloow.Migrations
                         .IsRequired();
 
                     b.Navigation("Reunion");
+                });
+
+            modelBuilder.Entity("MeetFloow.Reuniones.Reunion", b =>
+                {
+                    b.HasOne("Volo.Abp.Identity.IdentityUser", null)
+                        .WithMany()
+                        .HasForeignKey("AnfitrionId");
                 });
 
             modelBuilder.Entity("MeetFloow.Reuniones.SolicitudIngreso", b =>

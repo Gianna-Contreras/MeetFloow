@@ -66,13 +66,22 @@
 
       <div class="form-group">
         <label for="location">Ubicación</label>
-        <input 
-          type="text" 
-          id="location" 
-          [(ngModel)]="meetingData.location" 
+        <input
+          type="text"
+          id="location"
+          [(ngModel)]="meetingData.location"
           placeholder="Ej: Videollamada, Sala de juntas, etc."
           class="form-input"
         >
+      </div>
+
+      <div class="form-group">
+        <label for="estado">Estado</label>
+        <select id="estado" [(ngModel)]="meetingData.estado" class="form-select">
+          <option *ngFor="let option of getEstadoOptions()" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
       </div>
 
       <div class="form-group">

@@ -1,15 +1,17 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, map } from 'rxjs';
+import { ReunionApiService } from './reunion-api.service';
+import { Reunion, CreateReunionRequest, EstadoReunion, getEstadoLabel, getEstadoClass } from '../models/reunion.model';
 
 export interface Meeting {
   id: string;
   title: string;
-  description?: string;
+  description: string;
   date: string;
   time: string;
   duration: string;
   participants: string[];
-  status: 'Programada' | 'En curso' | 'Completada' | 'Cancelada' | 'Pendiente';
+  status: string;
   statusClass: string;
   location: string;
   participantsCount: number;
@@ -26,203 +28,143 @@ export class MeetingService {
   private meetingsSubject = new BehaviorSubject<Meeting[]>([]);
   meetings$ = this.meetingsSubject.asObservable();
 
-  constructor() {
+  constructor(private reunionApiService: ReunionApiService) {
     this.loadMeetings();
   }
 
-  private loadMeetings(): void {
-    const stored = localStorage.getItem('meetings');
-    if (stored) {
-      try {
-        const meetings = JSON.parse(stored);
+  loadMeetings(): void {
+    this.reunionApiService.getReuniones().subscribe({
+      next: (response) => {
+        const meetings = response.items.map(r => this.mapReunionToMeeting(r));
         this.meetingsSubject.next(meetings);
-      } catch (e) {
-        console.error('Error loading meetings:', e);
-        this.loadSampleMeetings();
+      },
+      error: (err) => {
+        console.error('Error loading meetings:', err);
+        this.meetingsSubject.next([]);
       }
-    } else {
-      this.loadSampleMeetings();
-    }
+    });
   }
 
-  private loadSampleMeetings(): void {
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const nextWeek = new Date(today);
-    nextWeek.setDate(nextWeek.getDate() + 5);
+  private mapReunionToMeeting(r: Reunion): Meeting {
+    const fechaHora = new Date(r.fechaHora);
+    const endTime = new Date(fechaHora.getTime() + r.duracionMinutos * 60000);
 
-    const sampleMeetings: Meeting[] = [
-      {
-        id: '1',
-        title: 'Estrategia de producto Q2',
-        description: 'Revisión de estrategia del producto para el segundo trimestre',
-        date: '22 May 2024',
-        time: '10:00 AM - 11:30 AM',
-        duration: '1h 30m',
-        participants: ['Gianna Contreras', 'Juan Pérez', 'María García', 'Carlos López', 'Ana Martínez'],
-        status: 'En curso',
-        statusClass: 'in-progress',
-        location: 'Sala de Juntas A',
-        participantsCount: 5,
-        totalParticipants: 8,
-        progress: 62,
-        fullDate: today,
-        createdAt: new Date()
-      },
-      {
-        id: '2',
-        title: 'Revisión de roadmap',
-        description: 'Revisión del roadmap de desarrollo',
-        date: '23 May. 2024',
-        time: '02:00 PM - 03:30 PM',
-        duration: '1h 30m',
-        participants: ['Gianna Contreras', 'Pedro Sánchez', 'Laura Rodríguez', 'Miguel Ángel'],
-        status: 'Programada',
-        statusClass: 'scheduled',
-        location: 'Sala Zoom',
-        participantsCount: 4,
-        totalParticipants: 7,
-        progress: 57,
-        fullDate: tomorrow,
-        createdAt: new Date()
-      },
-      {
-        id: '3',
-        title: 'Plan de marketing mensual',
-        description: 'Planificación de actividades de marketing',
-        date: '24 May. 2024',
-        time: '09:30 AM - 10:30 AM',
-        duration: '1h',
-        participants: ['Gianna Contreras', 'Sofía Ramírez', 'Diego Torres', 'Elena Fernández'],
-        status: 'Pendiente',
-        statusClass: 'pending',
-        location: 'Sala de Juntas B',
-        participantsCount: 4,
-        totalParticipants: 5,
-        progress: 80,
-        fullDate: new Date(tomorrow.getTime() + 86400000),
-        createdAt: new Date()
-      },
-      {
-        id: '4',
-        title: 'Retrospectiva de sprint',
-        description: 'Retrospectiva del sprint anterior',
-        date: '20 May. 2024',
-        time: '11:00 AM - 12:00 PM',
-        duration: '1h',
-        participants: ['Gianna Contreras', 'Roberto Díaz', 'Carmen Vega'],
-        status: 'Completada',
-        statusClass: 'completed',
-        location: 'Sala de Juntas A',
-        participantsCount: 3,
-        totalParticipants: 6,
-        progress: 50,
-        fullDate: yesterday,
-        createdAt: new Date()
-      },
-      {
-        id: '5',
-        title: 'Presentación a stakeholders',
-        description: 'Presentación de resultados a stakeholders',
-        date: '27 May. 2024',
-        time: '03:00 PM - 04:30 PM',
-        duration: '1h 30m',
-        participants: ['Gianna Contreras', 'Fernando Ruiz', 'Isabel Morales', 'Javier Castro'],
-        status: 'Programada',
-        statusClass: 'scheduled',
-        location: 'Sala Zoom',
-        participantsCount: 4,
-        totalParticipants: 8,
-        progress: 50,
-        fullDate: nextWeek,
-        createdAt: new Date()
-      },
-      {
-        id: '6',
-        title: 'Revisión de presupuesto',
-        description: 'Revisión del presupuesto anual',
-        date: '19 May. 2024',
-        time: '04:00 PM - 05:00 PM',
-        duration: '1h',
-        participants: ['Gianna Contreras', 'Luis Herrera', 'Patricia Jiménez'],
-        status: 'Cancelada',
-        statusClass: 'cancelled',
-        location: 'Sala de Juntas A',
-        participantsCount: 3,
-        totalParticipants: 5,
-        progress: 0,
-        fullDate: new Date(yesterday.getTime() - 86400000),
-        createdAt: new Date()
-      },
-      {
-        id: '7',
-        title: 'Kickoff de proyecto',
-        description: 'Inicio del nuevo proyecto',
-        date: '28 May. 2024',
-        time: '10:00 AM - 11:00 AM',
-        duration: '1h',
-        participants: ['Gianna Contreras', 'Ricardo Flores', 'Adriana Silva', 'Gabriel Ortiz', 'Victoria Reyes', 'Daniel Mendoza'],
-        status: 'Programada',
-        statusClass: 'scheduled',
-        location: 'Sala de Conferencias',
-        participantsCount: 6,
-        totalParticipants: 10,
-        progress: 30,
-        fullDate: new Date(nextWeek.getTime() + 86400000),
-        createdAt: new Date()
-      }
-    ];
-
-    this.meetingsSubject.next(sampleMeetings);
-    this.saveMeetings();
-  }
-
-  private saveMeetings(): void {
-    localStorage.setItem('meetings', JSON.stringify(this.meetingsSubject.value));
-  }
-
-  createMeeting(meeting: Omit<Meeting, 'id' | 'status' | 'statusClass' | 'progress' | 'createdAt'>): Meeting {
-    const newMeeting: Meeting = {
-      ...meeting,
-      id: this.generateId(),
-      status: 'Programada',
-      statusClass: 'scheduled',
+    return {
+      id: r.id,
+      title: r.titulo,
+      description: r.descripcion,
+      date: fechaHora.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }),
+      time: `${fechaHora.toTimeString().slice(0, 5)} - ${endTime.toTimeString().slice(0, 5)}`,
+      duration: this.formatDuration(r.duracionMinutos),
+      participants: [],
+      status: getEstadoLabel(r.estado),
+      statusClass: getEstadoClass(r.estado),
+      location: r.ubicacion,
+      participantsCount: 0,
+      totalParticipants: 10,
       progress: 0,
-      createdAt: new Date()
+      fullDate: fechaHora,
+      createdAt: r.creationTime ? new Date(r.creationTime) : new Date()
+    };
+  }
+
+  private formatDuration(minutes: number): string {
+    if (minutes < 60) return `${minutes}m`;
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+  }
+
+  createMeeting(meetingData: {
+    title: string;
+    description: string;
+    date: string;
+    time: string;
+    duration: string;
+    participants: string[];
+    location: string;
+    estado: EstadoReunion;
+  }): Observable<Meeting> {
+    const [startTime] = meetingData.time.split(' - ');
+    const fechaHora = new Date(`${meetingData.date}T${startTime}`);
+
+    const request: CreateReunionRequest = {
+      titulo: meetingData.title,
+      descripcion: meetingData.description,
+      fechaHora: fechaHora.toISOString(),
+      duracionMinutos: this.parseDuration(meetingData.duration),
+      ubicacion: meetingData.location,
+      estado: meetingData.estado
     };
 
-    const currentMeetings = this.meetingsSubject.value;
-    this.meetingsSubject.next([...currentMeetings, newMeeting]);
-    this.saveMeetings();
+    return this.reunionApiService.createReunion(request).pipe(
+      map(r => {
+        const meeting = this.mapReunionToMeeting(r);
+        const currentMeetings = this.meetingsSubject.value;
+        this.meetingsSubject.next([...currentMeetings, meeting]);
+        return meeting;
+      })
+    );
+  }
 
-    return newMeeting;
+  private parseDuration(duration: string): number {
+    const durationMap: { [key: string]: number } = {
+      '30m': 30,
+      '45m': 45,
+      '1h': 60,
+      '1h 30m': 90,
+      '2h': 120
+    };
+    return durationMap[duration] || 60;
   }
 
   updateMeeting(id: string, updates: Partial<Meeting>): void {
     const currentMeetings = this.meetingsSubject.value;
-    const updatedMeetings = currentMeetings.map(meeting =>
-      meeting.id === id ? { ...meeting, ...updates } : meeting
-    );
-    this.meetingsSubject.next(updatedMeetings);
-    this.saveMeetings();
+    const meeting = currentMeetings.find(m => m.id === id);
+    if (!meeting) return;
+
+    const request: CreateReunionRequest = {
+      titulo: updates.title ?? meeting.title,
+      descripcion: updates.description ?? meeting.description,
+      fechaHora: meeting.fullDate.toISOString(),
+      duracionMinutos: this.parseDuration(meeting.duration),
+      ubicacion: updates.location ?? meeting.location,
+      estado: this.getEstadoFromLabel(updates.status ?? meeting.status)
+    };
+
+    this.reunionApiService.updateReunion(id, request).subscribe({
+      next: (r) => {
+        const updatedMeeting = this.mapReunionToMeeting(r);
+        const updatedMeetings = currentMeetings.map(m => m.id === id ? updatedMeeting : m);
+        this.meetingsSubject.next(updatedMeetings);
+      },
+      error: (err) => console.error('Error updating meeting:', err)
+    });
+  }
+
+  private getEstadoFromLabel(label: string): EstadoReunion {
+    switch (label) {
+      case 'Pendiente': return EstadoReunion.Pendiente;
+      case 'Programada': return EstadoReunion.Programada;
+      case 'En curso': return EstadoReunion.EnCurso;
+      case 'Completada': return EstadoReunion.Completada;
+      case 'Cancelada': return EstadoReunion.Cancelada;
+      default: return EstadoReunion.Pendiente;
+    }
   }
 
   deleteMeeting(id: string): void {
-    const currentMeetings = this.meetingsSubject.value;
-    const filteredMeetings = currentMeetings.filter(meeting => meeting.id !== id);
-    this.meetingsSubject.next(filteredMeetings);
-    this.saveMeetings();
+    this.reunionApiService.deleteReunion(id).subscribe({
+      next: () => {
+        const currentMeetings = this.meetingsSubject.value;
+        this.meetingsSubject.next(currentMeetings.filter(m => m.id !== id));
+      },
+      error: (err) => console.error('Error deleting meeting:', err)
+    });
   }
 
   getMeeting(id: string): Meeting | undefined {
-    return this.meetingsSubject.value.find(meeting => meeting.id === id);
-  }
-
-  private generateId(): string {
-    return Math.random().toString(36).substring(2, 11);
+    return this.meetingsSubject.value.find(m => m.id === id);
   }
 
   getTodayMeetings(): Meeting[] {

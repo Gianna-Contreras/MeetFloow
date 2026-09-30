@@ -1,15 +1,19 @@
+using System.Collections.Generic;
+using System.Linq;
 using Riok.Mapperly.Abstractions;
 using Volo.Abp.Mapperly;
+using MeetFloow.Reuniones;
 
 namespace MeetFloow;
 
-/*
- * You can add your own mappings here.
- * [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
- * public partial class MeetFloowApplicationMappers : MapperBase<BookDto, CreateUpdateBookDto>
- * {
- *    public override partial CreateUpdateBookDto Map(BookDto source);
- * 
- *    public override partial void Map(BookDto source, CreateUpdateBookDto destination);
- * }
- */
+[Mapper]
+public partial class MeetFloowApplicationMappers
+{
+    public partial ReunionDto Map(Reunion source);
+    public partial void Map(CreateReunionDto source, Reunion destination);
+
+    public List<ReunionDto> MapList(List<Reunion> source)
+    {
+        return source.Select(Map).ToList();
+    }
+}

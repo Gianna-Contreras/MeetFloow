@@ -2,6 +2,7 @@ import { Component, Output, EventEmitter, Input, OnChanges } from '@angular/core
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MeetingService, Meeting } from '../services/meeting.service';
+import { EstadoReunion } from '../models/reunion.model';
 
 @Component({
   selector: 'app-crear-reunion-modal',
@@ -14,7 +15,7 @@ export class CrearReunionModalComponent implements OnChanges {
   @Input() show: boolean = false;
   @Output() meetingCreated = new EventEmitter<Meeting>();
   @Output() modalClosed = new EventEmitter<void>();
-  
+
   meetingData = {
     title: '',
     description: '',
@@ -22,10 +23,12 @@ export class CrearReunionModalComponent implements OnChanges {
     time: '',
     duration: '1h',
     participants: [] as string[],
-    location: 'Videollamada'
+    location: 'Videollamada',
+    estado: EstadoReunion.Pendiente as EstadoReunion
   };
 
   participantInput: string = '';
+  isCreating = false;
 
   constructor(private meetingService: MeetingService) {}
 
@@ -47,7 +50,8 @@ export class CrearReunionModalComponent implements OnChanges {
       time: this.getCurrentTime(),
       duration: '1h',
       participants: [],
-      location: 'Videollamada'
+      location: 'Videollamada',
+      estado: EstadoReunion.Pendiente
     };
     this.participantInput = '';
   }
@@ -84,60 +88,39 @@ export class CrearReunionModalComponent implements OnChanges {
       return;
     }
 
-    const meetingDate = new Date(`${this.meetingData.date}T${this.meetingData.time}`);
-    const endTime = new Date(meetingDate.getTime() + this.getDurationInMs(this.meetingData.duration));
-    
-    const timeRange = `${this.meetingData.time} - ${endTime.toTimeString().slice(0, 5)}`;
+    this.isCreating = true;
 
-    const newMeeting = this.meetingService.createMeeting({
+    this.meetingService.createMeeting({
       title: this.meetingData.title,
       description: this.meetingData.description,
-      date: meetingDate.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }),
-      time: timeRange,
+      date: this.meetingData.date,
+      time: this.meetingData.time,
       duration: this.meetingData.duration,
       participants: this.meetingData.participants,
       location: this.meetingData.location,
-      participantsCount: this.meetingData.participants.length,
-      totalParticipants: 10,
-      fullDate: meetingDate
+      estado: this.meetingData.estado
+    }).subscribe({
+      next: (newMeeting) => {
+        this.isCreating = false;
+        this.meetingCreated.emit(newMeeting);
+        this.closeModal();
+      },
+      error: (err) => {
+        this.isCreating = false;
+        console.error('Error creating meeting:', err);
+        alert('Error al crear la reunión: ' + (err?.error?.message || err?.message || 'Error de conexión'));
+      }
     });
-
-    // Update meeting status to in progress for immediate video call
-    this.meetingService.updateMeeting(newMeeting.id, {
-      status: 'En curso',
-      statusClass: 'in-progress'
-    });
-
-    this.meetingCreated.emit(newMeeting);
-    this.closeModal();
-  }
-
-  getDurationInMs(duration: string): number {
-    const durationMap: { [key: string]: number } = {
-      '30m': 30 * 60 * 1000,
-      '45m': 45 * 60 * 1000,
-      '1h': 60 * 60 * 1000,
-      '1h 30m': 90 * 60 * 1000,
-      '2h': 120 * 60 * 1000
-    };
-    return durationMap[duration] || 60 * 60 * 1000;
   }
 
   getDurationOptions(): string[] {
     return ['30m', '45m', '1h', '1h 30m', '2h'];
   }
 
-  generateMeetingLink(meetingId: string): string {
-    // Generate a consistent 6-digit code from meeting ID
-    let hash = 0;
-    for (let i = 0; i < meetingId.length; i++) {
-      const char = meetingId.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32bit integer
-    }
-    
-    const segment1 = Math.abs(hash % 900000) + 100000;
-    const segment2 = Math.abs((hash * 7) % 900000) + 100000;
-    return `${segment1} ${segment2}`;
+  getEstadoOptions(): { value: EstadoReunion; label: string }[] {
+    return [
+      { value: EstadoReunion.Pendiente, label: 'Pendiente' },
+      { value: EstadoReunion.Programada, label: 'Programada' }
+    ];
   }
 }

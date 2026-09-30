@@ -26,3 +26,12 @@ public enum EstadoInvitacion
     Aceptada = 1,
     Rechazada = 2
 }
+
+public enum EstadoReunion
+{
+    Pendiente = 0,
+    Programada = 1,
+    EnCurso = 2,
+    Completada = 3,
+    Cancelada = 4
+}
