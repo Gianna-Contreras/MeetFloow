@@ -554,6 +554,14 @@
             <button class="btn-primary" (click)="descargarDatos()">Descargar datos</button>
           </div>
 
+          <!-- Restaurar datos -->
+          <div class="privacidad-subsection">
+            <h3>Restaurar datos</h3>
+            <p>Carga un respaldo JSON exportado previamente</p>
+            <button class="btn-primary" (click)="triggerBackupInput()">Importar datos</button>
+            <input #backupInput type="file" accept="application/json,.json" (change)="onBackupFileSelected($event)" hidden>
+          </div>
+
           <!-- Zona de peligro -->
           <div class="privacidad-subsection danger-zone">
             <h3>Zona de peligro</h3>

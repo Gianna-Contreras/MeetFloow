@@ -1,53 +1,115 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { Reunion, CreateReunionRequest, PagedResultDto } from '../models/reunion.model';
+import { Observable, defer, of, throwError } from 'rxjs';
+import { Reunion, CreateReunionRequest, PagedResultDto, EstadoReunion } from '../models/reunion.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReunionApiService {
-  private readonly apiUrl = 'https://localhost:44371/api/app/reunion';
-
-  constructor(private http: HttpClient) {}
+  private readonly storageKey = 'meetfloow_reuniones';
 
   getReuniones(skipCount: number = 0, maxResultCount: number = 100): Observable<PagedResultDto<Reunion>> {
-    const params = new HttpParams()
-      .set('skipCount', skipCount.toString())
-      .set('maxResultCount', maxResultCount.toString());
-
-    return this.http.get<PagedResultDto<Reunion>>(this.apiUrl, { params });
+    return defer(() => {
+      const items = this.readAll();
+      return of({
+        items: items.slice(skipCount, skipCount + maxResultCount),
+        totalCount: items.length
+      });
+    });
   }
 
   getReunion(id: string): Observable<Reunion> {
-    return this.http.get<Reunion>(`${this.apiUrl}/${id}`);
+    return defer(() => {
+      const reunion = this.readAll().find(r => r.id === id);
+      return reunion ? of(reunion) : throwError(() => new Error(`Reunión ${id} no encontrada`));
+    });
   }
 
   createReunion(reunion: CreateReunionRequest): Observable<Reunion> {
-    return this.http.post<Reunion>(this.apiUrl, reunion);
+    return defer(() => {
+      const items = this.readAll();
+      const nueva: Reunion = {
+        ...reunion,
+        id: this.generateId(),
+        anfitrionId: 'local-user',
+        participantes: reunion.participantes ?? [],
+        creationTime: new Date().toISOString()
+      };
+      items.push(nueva);
+      this.writeAll(items);
+      return of(nueva);
+    });
   }
 
   updateReunion(id: string, reunion: CreateReunionRequest): Observable<Reunion> {
-    return this.http.put<Reunion>(`${this.apiUrl}/${id}`, reunion);
+    return defer(() => {
+      const items = this.readAll();
+      const index = items.findIndex(r => r.id === id);
+      if (index === -1) {
+        return throwError(() => new Error(`Reunión ${id} no encontrada`));
+      }
+
+      const cambios = Object.fromEntries(
+        Object.entries(reunion).filter(([, value]) => value !== undefined)
+      );
+      const actualizada: Reunion = {
+        ...items[index],
+        ...cambios,
+        participantes: reunion.participantes ?? items[index].participantes ?? []
+      };
+      items[index] = actualizada;
+      this.writeAll(items);
+      return of(actualizada);
+    });
   }
 
   deleteReunion(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return defer(() => {
+      this.writeAll(this.readAll().filter(r => r.id !== id));
+      return of(undefined);
+    });
   }
 
   finishReunion(id: string): Observable<Reunion> {
-    return this.http.post<Reunion>(`${this.apiUrl}/${id}/finish`, {});
+    return this.changeEstado(id, EstadoReunion.Completada, { horaFin: new Date().toISOString() });
   }
 
   startReunion(id: string): Observable<Reunion> {
-    return this.http.post<Reunion>(`${this.apiUrl}/${id}/start`, {});
+    return this.changeEstado(id, EstadoReunion.EnCurso, { horaInicio: new Date().toISOString() });
   }
 
-  getPerfil(): Observable<any> {
-    return this.http.get<any>('https://localhost:44371/api/app/perfil');
+  private changeEstado(id: string, estado: EstadoReunion, extra: Partial<Reunion>): Observable<Reunion> {
+    return defer(() => {
+      const items = this.readAll();
+      const index = items.findIndex(r => r.id === id);
+      if (index === -1) {
+        return throwError(() => new Error(`Reunión ${id} no encontrada`));
+      }
+      const actualizada: Reunion = { ...items[index], estado, ...extra };
+      items[index] = actualizada;
+      this.writeAll(items);
+      return of(actualizada);
+    });
   }
 
-  updateFotoPerfil(foto: string): Observable<any> {
-    return this.http.post<any>('https://localhost:44371/api/app/perfil/foto', { fotoPerfil: foto });
+  private readAll(): Reunion[] {
+    try {
+      const raw = localStorage.getItem(this.storageKey);
+      const items = raw ? JSON.parse(raw) : [];
+      return Array.isArray(items) ? items : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private writeAll(items: Reunion[]): void {
+    localStorage.setItem(this.storageKey, JSON.stringify(items));
+  }
+
+  private generateId(): string {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
+    }
+    return `reunion-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
   }
 }

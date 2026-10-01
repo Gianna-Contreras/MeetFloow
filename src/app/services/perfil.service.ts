@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { ReunionApiService } from './reunion-api.service';
 
 export interface Perfil {
   nombreCompleto: string;
@@ -26,16 +25,13 @@ export class PerfilService {
 
   perfil$ = this.perfilSubject.asObservable();
 
-  constructor(private reunionApiService: ReunionApiService) {
+  constructor() {
     this.cargarPerfilGuardado();
   }
 
   actualizarPerfil(perfil: Perfil): void {
     this.perfilSubject.next(perfil);
     localStorage.setItem('perfil', JSON.stringify(perfil));
-    this.reunionApiService.updateFotoPerfil(perfil.fotoPerfil).subscribe({
-      error: (err) => console.error('Error guardando foto en BD:', err)
-    });
   }
 
   private cargarPerfilGuardado(): void {
@@ -43,24 +39,10 @@ export class PerfilService {
     if (perfilGuardado) {
       try {
         const perfil = JSON.parse(perfilGuardado);
-        this.perfilSubject.next(perfil);
+        this.perfilSubject.next({ ...this.perfilSubject.value, ...perfil });
       } catch (e) {
         console.error('Error al cargar perfil guardado:', e);
       }
     }
-
-    this.reunionApiService.getPerfil().subscribe({
-      next: (perfil) => {
-        if (perfil) {
-          this.perfilSubject.next({
-            ...this.perfilSubject.value,
-            fotoPerfil: perfil.fotoPerfil || this.perfilSubject.value.fotoPerfil,
-            nombreCompleto: perfil.nombreCompleto || this.perfilSubject.value.nombreCompleto,
-            correoElectronico: perfil.correoElectronico || this.perfilSubject.value.correoElectronico
-          });
-        }
-      },
-      error: (err) => console.error('Error cargando perfil desde BD:', err)
-    });
   }
 }

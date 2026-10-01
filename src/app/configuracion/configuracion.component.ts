@@ -256,6 +256,17 @@ export class ConfiguracionComponent {
   ];
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('backupInput') backupInput!: ElementRef<HTMLInputElement>;
+
+  private readonly clavesBackup = [
+    'meetfloow_reuniones',
+    'perfil',
+    'notificaciones',
+    'preferencias',
+    'integraciones',
+    'privacidad',
+    'apariencia'
+  ];
 
   constructor() {
     this.cargarPerfilGuardado();
@@ -419,7 +430,72 @@ export class ConfiguracionComponent {
   }
 
   descargarDatos(): void {
-    console.log('Descargar datos');
+    const datos: Record<string, unknown> = { exportadoEn: new Date().toISOString() };
+    for (const clave of this.clavesBackup) {
+      const valor = localStorage.getItem(clave);
+      if (valor !== null) {
+        try {
+          datos[clave] = JSON.parse(valor);
+        } catch {
+          datos[clave] = valor;
+        }
+      }
+    }
+
+    const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const enlace = document.createElement('a');
+    enlace.href = url;
+    enlace.download = `meetfloow-datos-${new Date().toISOString().slice(0, 10)}.json`;
+    enlace.click();
+    URL.revokeObjectURL(url);
+  }
+
+  triggerBackupInput(): void {
+    this.backupInput.nativeElement.click();
+  }
+
+  onBackupFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || !input.files[0]) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      const contenido = e.target?.result;
+      if (typeof contenido !== 'string') {
+        return;
+      }
+
+      try {
+        const datos = JSON.parse(contenido);
+        if (!datos || typeof datos !== 'object' || Array.isArray(datos)) {
+          throw new Error('Formato no válido');
+        }
+
+        let importadas = 0;
+        for (const clave of this.clavesBackup) {
+          if (datos[clave] !== undefined) {
+            localStorage.setItem(clave, JSON.stringify(datos[clave]));
+            importadas++;
+          }
+        }
+
+        if (importadas === 0) {
+          alert('El archivo no contiene datos de MeetFloow');
+          return;
+        }
+
+        alert(`Se importaron ${importadas} secciones. Se recargará la aplicación.`);
+        window.location.reload();
+      } catch {
+        alert('El archivo no es un respaldo válido de MeetFloow');
+      } finally {
+        input.value = '';
+      }
+    };
+    reader.readAsText(input.files[0]);
   }
 
   eliminarCuenta(): void {

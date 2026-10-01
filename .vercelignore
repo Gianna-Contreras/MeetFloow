@@ -1,0 +1,13 @@
+# Backend .NET (no se despliega en Vercel)
+src/MeetFloow.*/
+test/
+.vs/
+Logs/
+.angular/
+*.db
+*.db-shm
+*.db-wal
+*.abpmdl
+*.abpsln
+*.slnx
+log.txt
