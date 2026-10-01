@@ -13,6 +13,9 @@ public class Reunion : FullAuditedAggregateRoot<Guid>
     public string Ubicacion { get; set; } = string.Empty;
     public EstadoReunion Estado { get; set; } = EstadoReunion.Pendiente;
     public Guid AnfitrionId { get; set; }
+    public string NombreAnfitrion { get; set; } = string.Empty;
+    public DateTime? HoraInicio { get; set; }
+    public DateTime? HoraFin { get; set; }
 
     // Navigation properties
     public virtual ConfiguracionReunion? Configuracion { get; set; }

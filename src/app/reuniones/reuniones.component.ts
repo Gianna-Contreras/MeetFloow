@@ -14,47 +14,25 @@ import { CrearReunionModalComponent } from '../crear-reunion-modal/crear-reunion
 })
 export class ReunionesComponent {
   showCrearReunionModal = false;
-  
+
   activeTab = 'Todas';
   tabs = ['Todas', 'Hoy', 'Próximas', 'Pasadas', 'Canceladas'];
-  
+
   showIpConfig = false;
   manualIp = '';
   currentUrl = '';
-  
+
   meetings: Meeting[] = [];
-  
+
   quickSummary = {
     meetingsThisWeek: 0,
     totalParticipants: 0
   };
 
-  recentActivities = [
-    {
-      icon: '📅',
-      description: 'Reunión \'Estrategia de producto Q2\' en curso',
-      time: '10:05 AM',
-      status: 'En curso'
-    },
-    {
-      icon: '👤',
-      description: 'Gianna Contreras creó una nueva reunión',
-      time: 'Ayer, 04:30 PM',
-      status: 'Programada'
-    },
-    {
-      icon: '✅',
-      description: 'Reunión \'Retrospectiva de sprint\' completada',
-      time: 'Ayer, 12:15 PM',
-      status: 'Completada'
-    },
-    {
-      icon: '👥',
-      description: 'Nuevo participante agregado a \'Plan de marketing mensual\'',
-      time: '22 may, 09:15 AM',
-      status: 'Pendiente'
-    }
-  ];
+  recentActivities: any[] = [];
+
+  private timeInterval: any;
+  private clockInterval: any;
 
   constructor(
     private router: Router,
@@ -63,6 +41,21 @@ export class ReunionesComponent {
   ) {
     this.loadMeetings();
     this.updateCurrentUrl();
+    this.timeInterval = setInterval(() => {
+      this.meetingService.loadMeetings();
+    }, 5000);
+    this.clockInterval = setInterval(() => {
+      this.getCurrentTime();
+    }, 1000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.timeInterval) {
+      clearInterval(this.timeInterval);
+    }
+    if (this.clockInterval) {
+      clearInterval(this.clockInterval);
+    }
   }
 
   loadMeetings(): void {
@@ -70,8 +63,18 @@ export class ReunionesComponent {
       this.meetings = meetings;
       this.quickSummary.meetingsThisWeek = meetings.length;
       this.quickSummary.totalParticipants = meetings.reduce((sum, m) => sum + m.participantsCount, 0);
+      this.updateRecentActivities();
     });
     this.meetingService.loadMeetings();
+  }
+
+  updateRecentActivities(): void {
+    this.recentActivities = this.meetings.slice(0, 4).map(m => ({
+      icon: m.status === 'En curso' ? '📅' : m.status === 'Completada' ? '✅' : m.status === 'Cancelada' ? '❌' : '👤',
+      description: `Reunión '${m.title}' - ${m.status}`,
+      time: m.date,
+      status: m.status
+    }));
   }
 
   updateCurrentUrl(): void {
@@ -111,7 +114,7 @@ export class ReunionesComponent {
         return this.meetings.filter(meeting => {
           const meetingDate = new Date(meeting.fullDate);
           meetingDate.setHours(0, 0, 0, 0);
-          return meetingDate.getTime() > today.getTime() && meeting.status !== 'Completada';
+          return meetingDate.getTime() > today.getTime() && meeting.status !== 'Completada' && meeting.status !== 'Cancelada';
         });
       case 'Pasadas':
         return this.meetings.filter(meeting => {
@@ -131,8 +134,23 @@ export class ReunionesComponent {
     this.activeTab = tab;
   }
 
+  getCurrentTime(): string {
+    return new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+
   joinMeeting(meetingId: string): void {
     this.router.navigate(['/videollamada', meetingId]);
+  }
+
+  cancelMeeting(meetingId: string, event: Event): void {
+    event.stopPropagation();
+    if (confirm('¿Estás seguro de que deseas cancelar esta reunión?')) {
+      this.meetingService.updateMeeting(meetingId, {
+        status: 'Cancelada',
+        statusClass: 'cancelled',
+        progress: 0
+      });
+    }
   }
 
   get todayMeetingsCount(): number {
@@ -145,7 +163,6 @@ export class ReunionesComponent {
 
   onMeetingCreated(meeting: Meeting): void {
     this.showCrearReunionModal = false;
-    // Navigate to the video call interface with the new meeting ID
     this.router.navigate(['/videollamada', meeting.id]);
   }
 

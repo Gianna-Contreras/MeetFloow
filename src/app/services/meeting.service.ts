@@ -3,6 +3,13 @@ import { BehaviorSubject, Observable, map } from 'rxjs';
 import { ReunionApiService } from './reunion-api.service';
 import { Reunion, CreateReunionRequest, EstadoReunion, getEstadoLabel, getEstadoClass } from '../models/reunion.model';
 
+export interface Participant {
+  id: string;
+  name: string;
+  avatar?: string;
+  initials: string;
+}
+
 export interface Meeting {
   id: string;
   title: string;
@@ -11,6 +18,7 @@ export interface Meeting {
   time: string;
   duration: string;
   participants: string[];
+  participantsList: Participant[];
   status: string;
   statusClass: string;
   location: string;
@@ -19,6 +27,9 @@ export interface Meeting {
   progress: number;
   fullDate: Date;
   createdAt: Date;
+  creatorName?: string;
+  horaInicio?: string;
+  horaFin?: string;
 }
 
 @Injectable({
@@ -49,6 +60,13 @@ export class MeetingService {
     const fechaHora = new Date(r.fechaHora);
     const endTime = new Date(fechaHora.getTime() + r.duracionMinutos * 60000);
 
+    const participantes = r.participantes || [];
+    const participantsList: Participant[] = participantes.map((name, index) => ({
+      id: `participant-${index}`,
+      name: name,
+      initials: this.getInitials(name)
+    }));
+
     return {
       id: r.id,
       title: r.titulo,
@@ -56,16 +74,28 @@ export class MeetingService {
       date: fechaHora.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }),
       time: `${fechaHora.toTimeString().slice(0, 5)} - ${endTime.toTimeString().slice(0, 5)}`,
       duration: this.formatDuration(r.duracionMinutos),
-      participants: [],
+      participants: participantes,
+      participantsList: participantsList,
       status: getEstadoLabel(r.estado),
       statusClass: getEstadoClass(r.estado),
       location: r.ubicacion,
-      participantsCount: 0,
+      participantsCount: participantes.length,
       totalParticipants: 10,
-      progress: 0,
+      progress: participantes.length > 0 ? Math.min(100, participantes.length * 10) : 0,
       fullDate: fechaHora,
-      createdAt: r.creationTime ? new Date(r.creationTime) : new Date()
+      createdAt: r.creationTime ? new Date(r.creationTime) : new Date(),
+      creatorName: r.nombreAnfitrion || r.anfitrionNombre || 'Usuario',
+      horaInicio: r.horaInicio ? new Date(r.horaInicio).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : undefined,
+      horaFin: r.horaFin ? new Date(r.horaFin).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : undefined
     };
+  }
+
+  private getInitials(name: string): string {
+    return name
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase())
+      .join('')
+      .substring(0, 2);
   }
 
   private formatDuration(minutes: number): string {
@@ -84,6 +114,7 @@ export class MeetingService {
     participants: string[];
     location: string;
     estado: EstadoReunion;
+    nombreAnfitrion?: string;
   }): Observable<Meeting> {
     const [startTime] = meetingData.time.split(' - ');
     const fechaHora = new Date(`${meetingData.date}T${startTime}`);
@@ -94,7 +125,8 @@ export class MeetingService {
       fechaHora: fechaHora.toISOString(),
       duracionMinutos: this.parseDuration(meetingData.duration),
       ubicacion: meetingData.location,
-      estado: meetingData.estado
+      estado: meetingData.estado,
+      nombreAnfitrion: meetingData.nombreAnfitrion || 'Usuario'
     };
 
     return this.reunionApiService.createReunion(request).pipe(
@@ -153,6 +185,29 @@ export class MeetingService {
     }
   }
 
+  finishMeeting(id: string, data: { participants: string[]; participantsCount: number }): void {
+    const currentMeetings = this.meetingsSubject.value;
+    const meeting = currentMeetings.find(m => m.id === id);
+    if (!meeting) return;
+
+    const request: CreateReunionRequest = {
+      titulo: meeting.title,
+      descripcion: meeting.description,
+      fechaHora: meeting.fullDate.toISOString(),
+      duracionMinutos: this.parseDuration(meeting.duration),
+      ubicacion: meeting.location,
+      estado: EstadoReunion.Completada,
+      nombreAnfitrion: meeting.creatorName
+    };
+
+    this.reunionApiService.updateReunion(id, request).subscribe({
+      next: () => {
+        this.loadMeetings();
+      },
+      error: (err) => console.error('Error finishing meeting:', err)
+    });
+  }
+
   deleteMeeting(id: string): void {
     this.reunionApiService.deleteReunion(id).subscribe({
       next: () => {
@@ -160,6 +215,15 @@ export class MeetingService {
         this.meetingsSubject.next(currentMeetings.filter(m => m.id !== id));
       },
       error: (err) => console.error('Error deleting meeting:', err)
+    });
+  }
+
+  startMeeting(id: string): void {
+    this.reunionApiService.startReunion(id).subscribe({
+      next: () => {
+        this.loadMeetings();
+      },
+      error: (err) => console.error('Error starting meeting:', err)
     });
   }
 

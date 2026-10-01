@@ -12,4 +12,6 @@ public interface IReunionAppService : IApplicationService
     Task<ReunionDto> CreateAsync(CreateReunionDto input);
     Task<ReunionDto> UpdateAsync(Guid id, CreateReunionDto input);
     Task DeleteAsync(Guid id);
+    Task<ReunionDto> FinishAsync(Guid id);
+    Task<ReunionDto> StartAsync(Guid id);
 }

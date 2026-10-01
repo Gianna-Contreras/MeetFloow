@@ -22,4 +22,7 @@ public class CreateReunionDto
     public string Ubicacion { get; set; } = string.Empty;
 
     public EstadoReunion Estado { get; set; } = EstadoReunion.Pendiente;
+
+    [StringLength(100)]
+    public string? NombreAnfitrion { get; set; }
 }

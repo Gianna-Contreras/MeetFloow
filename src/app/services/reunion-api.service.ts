@@ -34,4 +34,12 @@ export class ReunionApiService {
   deleteReunion(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  finishReunion(id: string): Observable<Reunion> {
+    return this.http.post<Reunion>(`${this.apiUrl}/${id}/finish`, {});
+  }
+
+  startReunion(id: string): Observable<Reunion> {
+    return this.http.post<Reunion>(`${this.apiUrl}/${id}/start`, {});
+  }
 }

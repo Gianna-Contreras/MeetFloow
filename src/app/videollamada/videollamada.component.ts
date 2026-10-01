@@ -46,10 +46,6 @@ export class VideollamadaComponent implements OnInit, OnDestroy, AfterViewInit {
   
   private meetingCheckInterval: any;
   private jitsiApi: any = null;
-  private timerInterval: any;
-  meetingTime: string = '00:00';
-  elapsedSeconds: number = 0;
-  meetingDuration: number = 3600; // Default 1 hour in seconds
   
   @ViewChild('jitsiContainer', { static: false }) jitsiContainer!: ElementRef;
 
@@ -88,9 +84,6 @@ export class VideollamadaComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.meetingCheckInterval) {
       clearInterval(this.meetingCheckInterval);
     }
-    if (this.timerInterval) {
-      clearInterval(this.timerInterval);
-    }
     if (this.jitsiApi) {
       this.jitsiApi.dispose();
     }
@@ -99,28 +92,29 @@ export class VideollamadaComponent implements OnInit, OnDestroy, AfterViewInit {
   loadMeeting(): void {
     this.meeting = this.meetingService.getMeeting(this.meetingId) || null;
     if (this.meeting) {
-      // Generate a consistent call ID based on meeting ID
       this.callId = this.generateCallIdFromMeetingId(this.meetingId);
-      // Initialize participants from meeting
-      this.participants = this.meeting.participants.map((name, index) => ({
-        id: `participant-${index}`,
-        name: name,
-        avatar: this.getInitials(name),
-        isMuted: false,
-        isVideoOff: true
-      }));
-      
-      // Calculate meeting duration in seconds
-      const durationParts = this.meeting.duration.split(' ');
-      let totalSeconds = 0;
-      if (durationParts.length >= 2) {
-        const hours = parseInt(durationParts[0]) || 0;
-        const minutes = parseInt(durationParts[1]) || 0;
-        totalSeconds = (hours * 3600) + (minutes * 60);
+
+      if (this.meeting.participantsList && this.meeting.participantsList.length > 0) {
+        this.participants = this.meeting.participantsList.map(p => ({
+          id: p.id,
+          name: p.name,
+          avatar: p.avatar || this.getInitials(p.name),
+          isMuted: false,
+          isVideoOff: true
+        }));
+      } else if (this.meeting.participants && this.meeting.participants.length > 0) {
+        this.participants = this.meeting.participants.map((name, index) => ({
+          id: `participant-${index}`,
+          name: name,
+          avatar: this.getInitials(name),
+          isMuted: false,
+          isVideoOff: true
+        }));
       }
-      
-      this.meetingDuration = totalSeconds > 0 ? totalSeconds : 3600; // Default 1 hour
-      this.startTimer();
+
+      if (this.meeting.status !== 'En curso' && this.meeting.status !== 'Completada') {
+        this.meetingService.startMeeting(this.meetingId);
+      }
     }
   }
 
@@ -222,12 +216,10 @@ export class VideollamadaComponent implements OnInit, OnDestroy, AfterViewInit {
 
   handleVideoConferenceJoined: (participant: any) => void = (participant) => {
     console.log('Local user joined:', participant);
-    this.startTimer();
   };
 
   handleVideoConferenceLeft: () => void = () => {
     console.log('Local user left');
-    this.stopTimer();
   };
 
   handleVideoStatusChanged: (event: any) => void = (event) => {
@@ -291,6 +283,7 @@ export class VideollamadaComponent implements OnInit, OnDestroy, AfterViewInit {
     };
     this.participants.push(newParticipant);
     this.addSystemMessage(`${newParticipant.name} se ha unido a la llamada`);
+    this.saveParticipantsToBackend();
   }
 
   removeParticipant(participantId: string): void {
@@ -298,55 +291,28 @@ export class VideollamadaComponent implements OnInit, OnDestroy, AfterViewInit {
     if (participant) {
       this.participants = this.participants.filter(p => p.id !== participantId);
       this.addSystemMessage(`${participant.name} ha abandonado la llamada`);
+      this.saveParticipantsToBackend();
     }
   }
 
-  startTimer(): void {
-    this.elapsedSeconds = 0;
-    this.timerInterval = setInterval(() => {
-      this.elapsedSeconds++;
-      const remainingSeconds = this.meetingDuration - this.elapsedSeconds;
-      
-      if (remainingSeconds <= 0) {
-        this.stopTimer();
-        this.meetingTime = '00:00';
-        this.handleMeetingEnd();
-      } else {
-        this.meetingTime = this.formatTime(remainingSeconds);
-      }
-    }, 1000);
+  saveParticipantsToBackend(): void {
+    if (!this.meetingId || !this.meeting) return;
+
+    const participantNames = this.participants.map(p => p.name);
+    this.meetingService.updateMeeting(this.meetingId, {
+      participants: participantNames,
+      participantsCount: this.participants.length
+    });
   }
 
-  stopTimer(): void {
-    if (this.timerInterval) {
-      clearInterval(this.timerInterval);
+  finishMeeting(): void {
+    if (this.meetingId && this.meeting) {
+      const participantNames = this.participants.map(p => p.name);
+      this.meetingService.finishMeeting(this.meetingId, {
+        participants: participantNames,
+        participantsCount: participantNames.length
+      });
     }
-  }
-
-  handleMeetingEnd(): void {
-    this.addSystemMessage('La reunión ha terminado según el tiempo estimado');
-    
-    // Give users a moment to react before automatically ending
-    setTimeout(() => {
-      if (this.jitsiApi) {
-        this.jitsiApi.executeCommand('hangup');
-      }
-      
-      if (this.meetingId && this.meeting) {
-        this.meetingService.updateMeeting(this.meetingId, {
-          status: 'Completada',
-          statusClass: 'completed',
-          progress: 100
-        });
-      }
-      this.router.navigate(['/reuniones']);
-    }, 5000); // 5 seconds warning before ending
-  }
-
-  formatTime(seconds: number): string {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   }
 
   formatMessageTime(timestamp: Date): string {
@@ -415,15 +381,7 @@ export class VideollamadaComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.jitsiApi) {
       this.jitsiApi.executeCommand('hangup');
     }
-    
-    if (this.meetingId && this.meeting) {
-      // Update meeting status to completed
-      this.meetingService.updateMeeting(this.meetingId, {
-        status: 'Completada',
-        statusClass: 'completed',
-        progress: 100
-      });
-    }
+    this.finishMeeting();
     this.router.navigate(['/reuniones']);
   }
 

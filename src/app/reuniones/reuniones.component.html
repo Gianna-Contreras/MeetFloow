@@ -29,21 +29,27 @@
       <div *ngFor="let meeting of filteredMeetings" class="meeting-card" (click)="joinMeeting(meeting.id)">
         <div class="meeting-header">
           <span class="meeting-status {{ meeting.statusClass }}">{{ meeting.status }}</span>
+          <button class="cancel-btn" (click)="cancelMeeting(meeting.id, $event)" title="Cancelar reunión">✕</button>
         </div>
         <h3 class="meeting-title">{{ meeting.title }}</h3>
         <div class="meeting-body">
           <div class="meeting-info">
-            <span class="info-item">📅 {{ meeting.date }}</span>
-            <span class="info-item">⏰ {{ meeting.time }}</span>
+            <span class="info-item">📅 Creada: {{ meeting.date }} {{ meeting.time }}</span>
+            <span class="info-item">🕐 Inicio: {{ meeting.horaInicio || 'No iniciada' }}</span>
+            <span class="info-item">🏁 Fin: {{ meeting.horaFin || 'En curso' }}</span>
             <span class="info-item">📍 {{ meeting.location }}</span>
+            <span class="info-item">👤 Creador: {{ meeting.creatorName || 'Usuario' }}</span>
           </div>
           <div class="meeting-right-section">
             <div class="meeting-participants">
               <div class="participant-avatars">
-                <div class="avatar-small" *ngFor="let i of [1,2,3]"></div>
-                <div class="avatar-more">+{{ meeting.totalParticipants - 3 }}</div>
+                <div class="avatar-small" *ngFor="let p of meeting.participantsList" [title]="p.name">
+                  <img *ngIf="p.avatar" [src]="p.avatar" [alt]="p.name">
+                  <span *ngIf="!p.avatar">{{ p.initials }}</span>
+                </div>
+                <div class="avatar-more" *ngIf="meeting.participantsCount > 3">+{{ meeting.participantsCount - 3 }}</div>
               </div>
-              <span class="participant-count">{{ meeting.participants }}/{{ meeting.totalParticipants }}</span>
+              <span class="participant-count">{{ meeting.participantsCount }} participantes en la llamada</span>
             </div>
             <div class="meeting-progress">
               <div class="progress-bar">

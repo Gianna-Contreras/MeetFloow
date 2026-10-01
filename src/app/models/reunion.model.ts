@@ -16,6 +16,10 @@ export interface Reunion {
   estado: EstadoReunion;
   anfitrionId: string;
   anfitrionNombre?: string;
+  nombreAnfitrion?: string;
+  horaInicio?: string;
+  horaFin?: string;
+  participantes?: string[];
   creationTime?: string;
 }
 
@@ -26,6 +30,7 @@ export interface CreateReunionRequest {
   duracionMinutos: number;
   ubicacion: string;
   estado: EstadoReunion;
+  nombreAnfitrion?: string;
 }
 
 export interface PagedResultDto<T> {

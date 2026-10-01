@@ -3,6 +3,7 @@ using System;
 using MeetFloow.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Volo.Abp.EntityFrameworkCore;
 
@@ -11,9 +12,11 @@ using Volo.Abp.EntityFrameworkCore;
 namespace MeetFloow.Migrations
 {
     [DbContext(typeof(MeetFloowDbContext))]
-    partial class MeetFloowDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260930041403_Reunion_NombreAnfitrion")]
+    partial class Reunion_NombreAnfitrion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -233,12 +236,6 @@ namespace MeetFloow.Migrations
                         .HasColumnName("ExtraProperties");
 
                     b.Property<DateTime>("FechaHora")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("HoraFin")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("HoraInicio")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsDeleted")

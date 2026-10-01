@@ -24,7 +24,8 @@ export class CrearReunionModalComponent implements OnChanges {
     duration: '1h',
     participants: [] as string[],
     location: 'Videollamada',
-    estado: EstadoReunion.Pendiente as EstadoReunion
+    estado: EstadoReunion.Pendiente as EstadoReunion,
+    nombreAnfitrion: ''
   };
 
   participantInput: string = '';
@@ -51,7 +52,8 @@ export class CrearReunionModalComponent implements OnChanges {
       duration: '1h',
       participants: [],
       location: 'Videollamada',
-      estado: EstadoReunion.Pendiente
+      estado: EstadoReunion.Pendiente,
+      nombreAnfitrion: ''
     };
     this.participantInput = '';
   }
@@ -98,7 +100,8 @@ export class CrearReunionModalComponent implements OnChanges {
       duration: this.meetingData.duration,
       participants: this.meetingData.participants,
       location: this.meetingData.location,
-      estado: this.meetingData.estado
+      estado: this.meetingData.estado,
+      nombreAnfitrion: this.meetingData.nombreAnfitrion || 'Usuario'
     }).subscribe({
       next: (newMeeting) => {
         this.isCreating = false;

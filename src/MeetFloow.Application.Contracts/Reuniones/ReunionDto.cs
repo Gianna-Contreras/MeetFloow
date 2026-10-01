@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using MeetFloow.Reuniones;
 using Volo.Abp.Application.Dtos;
 
@@ -14,4 +15,8 @@ public class ReunionDto : AuditedEntityDto<Guid>
     public EstadoReunion Estado { get; set; }
     public Guid AnfitrionId { get; set; }
     public string? AnfitrionNombre { get; set; }
+    public string? NombreAnfitrion { get; set; }
+    public DateTime? HoraInicio { get; set; }
+    public DateTime? HoraFin { get; set; }
+    public List<string> Participantes { get; set; } = new();
 }

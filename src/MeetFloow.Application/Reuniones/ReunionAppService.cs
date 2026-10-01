@@ -82,7 +82,8 @@ public class ReunionAppService : ApplicationService,
             FechaHora = input.FechaHora,
             DuracionMinutos = input.DuracionMinutos,
             Ubicacion = input.Ubicacion,
-            Estado = input.Estado
+            Estado = input.Estado,
+            NombreAnfitrion = input.NombreAnfitrion ?? "Usuario"
         };
 
         await _reunionRepository.InsertAsync(reunion);
@@ -111,6 +112,24 @@ public class ReunionAppService : ApplicationService,
         await _reunionRepository.DeleteAsync(id);
     }
 
+    public async Task<ReunionDto> FinishAsync(Guid id)
+    {
+        var reunion = await _reunionRepository.GetAsync(id);
+        reunion.HoraFin = DateTime.Now;
+        reunion.Estado = EstadoReunion.Completada;
+        await _reunionRepository.UpdateAsync(reunion);
+        return MapToDto(reunion);
+    }
+
+    public async Task<ReunionDto> StartAsync(Guid id)
+    {
+        var reunion = await _reunionRepository.GetAsync(id);
+        reunion.HoraInicio = DateTime.Now;
+        reunion.Estado = EstadoReunion.EnCurso;
+        await _reunionRepository.UpdateAsync(reunion);
+        return MapToDto(reunion);
+    }
+
     private static ReunionDto MapToDto(Reunion reunion)
     {
         return new ReunionDto
@@ -123,6 +142,9 @@ public class ReunionAppService : ApplicationService,
             Ubicacion = reunion.Ubicacion,
             Estado = reunion.Estado,
             AnfitrionId = reunion.AnfitrionId,
+            NombreAnfitrion = reunion.NombreAnfitrion,
+            HoraInicio = reunion.HoraInicio,
+            HoraFin = reunion.HoraFin,
             CreationTime = reunion.CreationTime
         };
     }
