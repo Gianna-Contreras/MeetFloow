@@ -31,6 +31,7 @@ export interface CreateReunionRequest {
   ubicacion: string;
   estado: EstadoReunion;
   nombreAnfitrion?: string;
+  participantes?: string[];
 }
 
 export interface PagedResultDto<T> {

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, map } from 'rxjs';
 import { ReunionApiService } from './reunion-api.service';
 import { Reunion, CreateReunionRequest, EstadoReunion, getEstadoLabel, getEstadoClass } from '../models/reunion.model';
+import { PerfilService } from './perfil.service';
 
 export interface Participant {
   id: string;
@@ -39,8 +40,19 @@ export class MeetingService {
   private meetingsSubject = new BehaviorSubject<Meeting[]>([]);
   meetings$ = this.meetingsSubject.asObservable();
 
-  constructor(private reunionApiService: ReunionApiService) {
+  constructor(
+    private reunionApiService: ReunionApiService,
+    private perfilService: PerfilService
+  ) {
     this.loadMeetings();
+  }
+
+  getUserEmail(): string {
+    let email = '';
+    this.perfilService.perfil$.subscribe(p => {
+      email = p.correoElectronico;
+    }).unsubscribe();
+    return email || 'usuario@meetflow.com';
   }
 
   loadMeetings(): void {
@@ -72,7 +84,7 @@ export class MeetingService {
       title: r.titulo,
       description: r.descripcion,
       date: fechaHora.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }),
-      time: `${fechaHora.toTimeString().slice(0, 5)} - ${endTime.toTimeString().slice(0, 5)}`,
+      time: `${fechaHora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })} - ${endTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`,
       duration: this.formatDuration(r.duracionMinutos),
       participants: participantes,
       participantsList: participantsList,
@@ -119,14 +131,29 @@ export class MeetingService {
     const [startTime] = meetingData.time.split(' - ');
     const fechaHora = new Date(`${meetingData.date}T${startTime}`);
 
+    const offset = -fechaHora.getTimezoneOffset();
+    const offsetHours = Math.floor(Math.abs(offset) / 60);
+    const offsetMinutes = Math.abs(offset) % 60;
+    const offsetSign = offset >= 0 ? '+' : '-';
+    const offsetStr = `${offsetSign}${offsetHours.toString().padStart(2, '0')}:${offsetMinutes.toString().padStart(2, '0')}`;
+
+    const year = fechaHora.getFullYear();
+    const month = (fechaHora.getMonth() + 1).toString().padStart(2, '0');
+    const day = fechaHora.getDate().toString().padStart(2, '0');
+    const hours = fechaHora.getHours().toString().padStart(2, '0');
+    const minutes = fechaHora.getMinutes().toString().padStart(2, '0');
+    const seconds = fechaHora.getSeconds().toString().padStart(2, '0');
+
+    const fechaHoraStr = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}${offsetStr}`;
+
     const request: CreateReunionRequest = {
       titulo: meetingData.title,
       descripcion: meetingData.description,
-      fechaHora: fechaHora.toISOString(),
+      fechaHora: fechaHoraStr,
       duracionMinutos: this.parseDuration(meetingData.duration),
       ubicacion: meetingData.location,
       estado: meetingData.estado,
-      nombreAnfitrion: meetingData.nombreAnfitrion || 'Usuario'
+      nombreAnfitrion: this.getUserEmail()
     };
 
     return this.reunionApiService.createReunion(request).pipe(
@@ -161,7 +188,8 @@ export class MeetingService {
       fechaHora: meeting.fullDate.toISOString(),
       duracionMinutos: this.parseDuration(meeting.duration),
       ubicacion: updates.location ?? meeting.location,
-      estado: this.getEstadoFromLabel(updates.status ?? meeting.status)
+      estado: this.getEstadoFromLabel(updates.status ?? meeting.status),
+      participantes: updates.participants ?? meeting.participants ?? []
     };
 
     this.reunionApiService.updateReunion(id, request).subscribe({

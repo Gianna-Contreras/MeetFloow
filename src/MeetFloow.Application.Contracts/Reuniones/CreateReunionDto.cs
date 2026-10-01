@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using MeetFloow.Reuniones;
 
@@ -25,4 +26,6 @@ public class CreateReunionDto
 
     [StringLength(100)]
     public string? NombreAnfitrion { get; set; }
+
+    public List<string> Participantes { get; set; } = new();
 }

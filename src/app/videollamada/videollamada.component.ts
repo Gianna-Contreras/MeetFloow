@@ -274,15 +274,16 @@ export class VideollamadaComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   addJitsiParticipant(participant: any): void {
+    const email = participant.email || participant.displayName || 'usuario@meetflow.com';
     const newParticipant: Participant = {
       id: participant.id,
-      name: participant.displayName || 'Usuario',
-      avatar: this.getInitials(participant.displayName || 'Usuario'),
+      name: email,
+      avatar: this.getInitials(email),
       isMuted: false,
       isVideoOff: true
     };
     this.participants.push(newParticipant);
-    this.addSystemMessage(`${newParticipant.name} se ha unido a la llamada`);
+    this.addSystemMessage(`${email} se ha unido a la llamada`);
     this.saveParticipantsToBackend();
   }
 

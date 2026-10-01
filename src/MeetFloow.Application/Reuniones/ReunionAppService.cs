@@ -101,6 +101,7 @@ public class ReunionAppService : ApplicationService,
         reunion.DuracionMinutos = input.DuracionMinutos;
         reunion.Ubicacion = input.Ubicacion;
         reunion.Estado = input.Estado;
+        reunion.ParticipantesNombres = input.Participantes ?? new List<string>();
 
         await _reunionRepository.UpdateAsync(reunion);
 
@@ -145,6 +146,7 @@ public class ReunionAppService : ApplicationService,
             NombreAnfitrion = reunion.NombreAnfitrion,
             HoraInicio = reunion.HoraInicio,
             HoraFin = reunion.HoraFin,
+            Participantes = reunion.ParticipantesNombres,
             CreationTime = reunion.CreationTime
         };
     }

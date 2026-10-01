@@ -32,7 +32,6 @@ export class ReunionesComponent {
   recentActivities: any[] = [];
 
   private timeInterval: any;
-  private clockInterval: any;
 
   constructor(
     private router: Router,
@@ -44,17 +43,11 @@ export class ReunionesComponent {
     this.timeInterval = setInterval(() => {
       this.meetingService.loadMeetings();
     }, 5000);
-    this.clockInterval = setInterval(() => {
-      this.getCurrentTime();
-    }, 1000);
   }
 
   ngOnDestroy(): void {
     if (this.timeInterval) {
       clearInterval(this.timeInterval);
-    }
-    if (this.clockInterval) {
-      clearInterval(this.clockInterval);
     }
   }
 
@@ -134,9 +127,7 @@ export class ReunionesComponent {
     this.activeTab = tab;
   }
 
-  getCurrentTime(): string {
-    return new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  }
+
 
   joinMeeting(meetingId: string): void {
     this.router.navigate(['/videollamada', meetingId]);

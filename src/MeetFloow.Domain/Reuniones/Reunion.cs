@@ -16,6 +16,7 @@ public class Reunion : FullAuditedAggregateRoot<Guid>
     public string NombreAnfitrion { get; set; } = string.Empty;
     public DateTime? HoraInicio { get; set; }
     public DateTime? HoraFin { get; set; }
+    public List<string> ParticipantesNombres { get; set; } = new();
 
     // Navigation properties
     public virtual ConfiguracionReunion? Configuracion { get; set; }
