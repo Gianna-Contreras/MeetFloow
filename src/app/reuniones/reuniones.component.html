@@ -29,7 +29,11 @@
       <div *ngFor="let meeting of filteredMeetings" class="meeting-card" (click)="joinMeeting(meeting.id)">
         <div class="meeting-header">
           <span class="meeting-status {{ meeting.statusClass }}">{{ meeting.status }}</span>
-          <button class="cancel-btn" (click)="cancelMeeting(meeting.id, $event)" title="Cancelar reunión">✕</button>
+          <div class="header-actions">
+            <button class="action-btn" (click)="setMeetingStatus(meeting.id, 'Pendiente', 'pending', $event)" title="Marcar como pendiente">⏳</button>
+            <button class="action-btn" (click)="setMeetingStatus(meeting.id, 'Programada', 'scheduled', $event)" title="Marcar como programada">📅</button>
+            <button class="action-btn cancel-btn" (click)="cancelMeeting(meeting.id, $event)" title="Cancelar reunión">✕</button>
+          </div>
         </div>
         <h3 class="meeting-title">{{ meeting.title }}</h3>
         <div class="meeting-body">

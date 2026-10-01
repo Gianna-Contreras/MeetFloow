@@ -144,6 +144,14 @@ export class ReunionesComponent {
     }
   }
 
+  setMeetingStatus(meetingId: string, status: string, statusClass: string, event: Event): void {
+    event.stopPropagation();
+    this.meetingService.updateMeeting(meetingId, {
+      status: status,
+      statusClass: statusClass
+    });
+  }
+
   get todayMeetingsCount(): number {
     return this.meetingService.getTodayMeetings().length;
   }
