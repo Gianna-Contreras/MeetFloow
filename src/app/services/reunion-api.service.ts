@@ -42,4 +42,12 @@ export class ReunionApiService {
   startReunion(id: string): Observable<Reunion> {
     return this.http.post<Reunion>(`${this.apiUrl}/${id}/start`, {});
   }
+
+  getPerfil(): Observable<any> {
+    return this.http.get<any>('https://localhost:44371/api/app/perfil');
+  }
+
+  updateFotoPerfil(foto: string): Observable<any> {
+    return this.http.post<any>('https://localhost:44371/api/app/perfil/foto', { fotoPerfil: foto });
+  }
 }

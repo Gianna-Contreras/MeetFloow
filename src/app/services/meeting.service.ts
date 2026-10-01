@@ -225,7 +225,8 @@ export class MeetingService {
       duracionMinutos: this.parseDuration(meeting.duration),
       ubicacion: meeting.location,
       estado: EstadoReunion.Completada,
-      nombreAnfitrion: meeting.creatorName
+      nombreAnfitrion: meeting.creatorName,
+      participantes: data.participants
     };
 
     this.reunionApiService.updateReunion(id, request).subscribe({
