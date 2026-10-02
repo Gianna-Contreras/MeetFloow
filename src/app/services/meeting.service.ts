@@ -168,11 +168,12 @@ export class MeetingService {
 
   private parseDuration(duration: string): number {
     const durationMap: { [key: string]: number } = {
+      '5m': 5,
+      '10m': 10,
+      '15m': 15,
       '30m': 30,
       '45m': 45,
-      '1h': 60,
-      '1h 30m': 90,
-      '2h': 120
+      '1h': 60
     };
     return durationMap[duration] || 60;
   }

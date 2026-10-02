@@ -117,7 +117,7 @@ export class CrearReunionModalComponent implements OnChanges {
   }
 
   getDurationOptions(): string[] {
-    return ['30m', '45m', '1h', '1h 30m', '2h'];
+    return ['5m', '10m', '15m', '30m', '45m', '1h'];
   }
 
   getEstadoOptions(): { value: EstadoReunion; label: string }[] {
